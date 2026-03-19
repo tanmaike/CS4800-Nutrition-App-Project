@@ -21,13 +21,30 @@ const nutritionFactsSchema = new mongoose.Schema({
         default: 0 
     },
 
-    fcpAmount: { 
-        fat: Number,
-        carb: Number,
-        protein: Number,
-        required: true,
-        min: 0,
-        unit: { type: Number }
+    fcpAmount: {
+        fat: { 
+            type: Number, 
+            required: true,
+            min: 0,
+            default: 0 
+        },
+        carbs: { 
+            type: Number, 
+            required: true,
+            min: 0,
+            default: 0 
+        },
+        protein: { 
+            type: Number, 
+            required: true,
+            min: 0,
+            default: 0 
+        },
+        unit: { 
+            type: String, 
+            default: 'g',
+            enum: ['g', 'mg', 'mcg']  // Restrict to valid units
+        }
     }
 });
 
