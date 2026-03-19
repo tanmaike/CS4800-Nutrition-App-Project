@@ -1,88 +1,192 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
-// API base URL - adjust based on your backend
-const API_URL = 'http://localhost:5173/api';
+const API_BASE_URL = 'http://localhost:5001';
+const API_URL = `${API_BASE_URL}/api`;
 
 class ItemManager extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: [],
+      items: [], // Initialize as empty array
       currentItem: {
         name: '',
+        calories: 0,
         quantity: 0,
-        price: 0.00,
-        isAvailable: true,
-        tags: [],
-        ratings: [],
-        dimensions: {
-          length: 0,
-          width: 0,
-          height: 0,
-          unit: 'cm'
-        },
-        metadata: {}
+        fcpAmount: {
+          fat: 0,
+          carbs: 0,
+          protein: 0,
+          unit: 'g'
+        }
       },
       loading: false,
-      error: null,
-      newTag: '',
-      newRating: '',
-      editingId: null
+      error: null
     };
   }
 
-  // Component Lifecycle - Fetch data on mount
   componentDidMount() {
     this.fetchItems();
   }
 
-  // API Methods
   fetchItems = async () => {
     this.setState({ loading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/items`);
-      this.setState({ items: response.data, loading: false });
+      console.log('Fetching from:', `${API_URL}/items`); // Debug log
+      
+      const response = await axios.get(`${API_URL}/items`, {
+        timeout: 5000, // 5 second timeout
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('Full response:', response); // Debug log
+      console.log('Response data:', response.data); // Debug log
+      
+      // Ensure we always have an array
+      const items = Array.isArray(response.data) ? response.data : [];
+      this.setState({ items, loading: false });
+    } catch (error) {
+      console.error('Full error object:', error); // Debug log
+      
+      let errorMessage = 'Failed to fetch items: ';
+      if (error.code === 'ECONNABORTED') {
+        errorMessage += 'Request timeout - backend might be slow';
+      } else if (error.message.includes('Network Error')) {
+        errorMessage += 'Cannot connect to backend. Make sure it\'s running on port 5000';
+      } else if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        errorMessage += `Server error: ${error.response.status} - ${error.response.data.message || 'Unknown error'}`;
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage += 'No response from server';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        errorMessage += error.message;
+      }
+      
+      this.setState({ 
+        error: errorMessage, 
+        loading: false,
+        items: []
+      });
+    }
+  };
+
+  createItem = async (e) => {
+    e.preventDefault();
+    this.setState({ loading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/items`, this.state.currentItem);
+      this.setState(prevState => ({
+        items: [...prevState.items, response.data],
+        currentItem: {
+          name: '',
+          calories: 0,
+          quantity: 0,
+          fcpAmount: {
+            fat: 0,
+            carbs: 0,
+            protein: 0,
+            unit: 'g'
+          }
+        },
+        loading: false
+      }));
     } catch (error) {
       this.setState({ 
-        error: 'Failed to fetch items: ' + error.message, 
+        error: 'Failed to create item: ' + error.message, 
         loading: false 
       });
     }
   };
 
+  handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Handle nested fcpAmount fields
+    if (name.startsWith('fcpAmount.')) {
+      const field = name.split('.')[1];
+      this.setState(prevState => ({
+        currentItem: {
+          ...prevState.currentItem,
+          fcpAmount: {
+            ...prevState.currentItem.fcpAmount,
+            [field]: parseFloat(value) || 0
+          }
+        }
+      }));
+    } else {
+      // Handle top-level fields
+      this.setState(prevState => ({
+        currentItem: {
+          ...prevState.currentItem,
+          [name]: name === 'name' ? value : (parseFloat(value) || 0)
+        }
+      }));
+    }
+  };
+
   render() {
-    const { items, currentItem, loading, error, newTag, newRating, editingId } = this.state;
+    const { items, currentItem, loading, error } = this.state;
+
+    // Debug logging
+    console.log('Rendering with items:', items);
+    console.log('Items is array:', Array.isArray(items));
 
     return (
-      <div className="item-manager">
-        <h1>Item Manager - Multiple Datatypes Demo</h1>
+      <div style={styles.container}>
+        <h1>🍎 Nutrition Facts Manager</h1>
         
         {/* Error Display */}
-        {error && <div className="error">{error}</div>}
+        {error && (
+          <div style={styles.error}>
+            <strong>Error:</strong> {error}
+          </div>
+        )}
         
         {/* Loading Indicator */}
-        {loading && <div className="loading">Loading...</div>}
+        {loading && (
+          <div style={styles.loading}>
+            Loading...
+          </div>
+        )}
 
-        {/* Form for Creating/Editing Items */}
-        <form onSubmit={this.handleSubmit} className="item-form">
-          <h2>{editingId ? 'Edit Item' : 'Add New Item'}</h2>
+        {/* Form for Creating Items */}
+        <form onSubmit={this.createItem} style={styles.form}>
+          <h2>Add New Food Item</h2>
           
-          {/* String Input */}
-          <div className="form-group">
-            <label>Name (String):</label>
+          <div style={styles.formGroup}>
+            <label>Food Name:</label>
             <input
               type="text"
               name="name"
               value={currentItem.name}
               onChange={this.handleInputChange}
               required
+              style={styles.input}
+              placeholder="e.g., Apple"
             />
           </div>
 
-          {/* Number Input - Integer */}
-          <div className="form-group">
-            <label>Quantity (Number - Integer):</label>
+          <div style={styles.formGroup}>
+            <label>Calories:</label>
+            <input
+              type="number"
+              name="calories"
+              value={currentItem.calories}
+              onChange={this.handleInputChange}
+              min="0"
+              step="1"
+              required
+              style={styles.input}
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label>Quantity (grams):</label>
             <input
               type="number"
               name="quantity"
@@ -91,190 +195,185 @@ class ItemManager extends Component {
               min="0"
               step="1"
               required
+              style={styles.input}
             />
           </div>
 
-          {/* Number Input - Float/Decimal */}
-          <div className="form-group">
-            <label>Price (Number - Decimal):</label>
+          <h3>Macronutrients (per 100g)</h3>
+          
+          <div style={styles.formGroup}>
+            <label>Fat (g):</label>
             <input
               type="number"
-              name="price"
-              value={currentItem.price}
+              name="fcpAmount.fat"
+              value={currentItem.fcpAmount.fat}
               onChange={this.handleInputChange}
               min="0"
-              step="0.01"
-              required
+              step="0.1"
+              style={styles.input}
             />
           </div>
 
-          {/* Boolean Input */}
-          <div className="form-group">
-            <label>
-              <input
-                type="checkbox"
-                name="isAvailable"
-                checked={currentItem.isAvailable}
-                onChange={this.handleInputChange}
-              />
-              Is Available? (Boolean)
-            </label>
+          <div style={styles.formGroup}>
+            <label>Carbs (g):</label>
+            <input
+              type="number"
+              name="fcpAmount.carbs"
+              value={currentItem.fcpAmount.carbs}
+              onChange={this.handleInputChange}
+              min="0"
+              step="0.1"
+              style={styles.input}
+            />
           </div>
 
-          {/* Array of Strings - Tags */}
-          <div className="form-group">
-            <label>Tags (Array of Strings):</label>
-            <div className="array-input">
-              <input
-                type="text"
-                value={newTag}
-                onChange={(e) => this.setState({ newTag: e.target.value })}
-                placeholder="Enter a tag"
-              />
-              <button type="button" onClick={this.addTag}>Add Tag</button>
-            </div>
-            <div className="tags-list">
-              {currentItem.tags.map((tag, index) => (
-                <span key={index} className="tag">
-                  {tag}
-                  <button type="button" onClick={() => this.removeTag(index)}>×</button>
-                </span>
-              ))}
-            </div>
+          <div style={styles.formGroup}>
+            <label>Protein (g):</label>
+            <input
+              type="number"
+              name="fcpAmount.protein"
+              value={currentItem.fcpAmount.protein}
+              onChange={this.handleInputChange}
+              min="0"
+              step="0.1"
+              style={styles.input}
+            />
           </div>
 
-          {/* Array of Numbers - Ratings */}
-          <div className="form-group">
-            <label>Ratings (Array of Numbers 1-5):</label>
-            <div className="array-input">
-              <input
-                type="number"
-                value={newRating}
-                onChange={(e) => this.setState({ newRating: e.target.value })}
-                min="1"
-                max="5"
-                step="0.5"
-                placeholder="Rating 1-5"
-              />
-              <button type="button" onClick={this.addRating}>Add Rating</button>
-            </div>
-            <div className="ratings-list">
-              {currentItem.ratings.map((rating, index) => (
-                <span key={index} className="rating">
-                  {rating} ★
-                  <button type="button" onClick={() => this.removeRating(index)}>×</button>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Nested Object - Dimensions */}
-          <div className="form-group nested">
-            <label>Dimensions (Nested Object):</label>
-            <div className="nested-fields">
-              <input
-                type="number"
-                name="length"
-                placeholder="Length"
-                value={currentItem.dimensions.length}
-                onChange={this.handleDimensionChange}
-                step="0.1"
-              />
-              <input
-                type="number"
-                name="width"
-                placeholder="Width"
-                value={currentItem.dimensions.width}
-                onChange={this.handleDimensionChange}
-                step="0.1"
-              />
-              <input
-                type="number"
-                name="height"
-                placeholder="Height"
-                value={currentItem.dimensions.height}
-                onChange={this.handleDimensionChange}
-                step="0.1"
-              />
-              <select
-                name="unit"
-                value={currentItem.dimensions.unit}
-                onChange={this.handleDimensionChange}
-              >
-                <option value="cm">cm</option>
-                <option value="m">m</option>
-                <option value="in">in</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Form Actions */}
-          <div className="form-actions">
-            <button type="submit" disabled={loading}>
-              {editingId ? 'Update Item' : 'Create Item'}
-            </button>
-            {editingId && (
-              <button type="button" onClick={this.cancelEdit}>
-                Cancel
-              </button>
-            )}
-          </div>
+          <button type="submit" disabled={loading} style={styles.button}>
+            {loading ? 'Adding...' : 'Add Food Item'}
+          </button>
         </form>
 
-        {/* Items List Display */}
-        <div className="items-list">
-          <h2>Items from Database</h2>
-          {items.length === 0 ? (
-            <p>No items found. Add your first item!</p>
+        {/* Items List Display - Safely render items */}
+        <div style={styles.itemsList}>
+          <h2>Food Items in Database</h2>
+          
+          {/* Check if items exists and is an array before mapping */}
+          {!items ? (
+            <p>Loading items...</p>
+          ) : !Array.isArray(items) ? (
+            <p style={styles.error}>Error: Items data is not in the correct format</p>
+          ) : items.length === 0 ? (
+            <p>No food items found. Add your first item above!</p>
           ) : (
-            items.map(item => (
-              <div key={item._id} className="item-card">
-                <h3>{item.name}</h3>
-                <div className="item-details">
-                  <p><strong>Quantity:</strong> {item.quantity}</p>
-                  <p><strong>Price:</strong> ${item.price.toFixed(2)}</p>
-                  <p><strong>Available:</strong> {item.isAvailable ? '✓' : '✗'}</p>
-                  
-                  {/* Display Tags Array */}
-                  {item.tags && item.tags.length > 0 && (
-                    <p><strong>Tags:</strong> {item.tags.join(', ')}</p>
-                  )}
-                  
-                  {/* Display Ratings Array */}
-                  {item.ratings && item.ratings.length > 0 && (
-                    <div>
-                      <strong>Ratings:</strong>
-                      <div className="ratings-display">
-                        {item.ratings.map((rating, i) => (
-                          <span key={i} className="rating-star">{rating}★</span>
-                        ))}
+            <div style={styles.grid}>
+              {items.map(item => (
+                <div key={item._id} style={styles.card}>
+                  <h3 style={styles.cardTitle}>{item.name}</h3>
+                  <div style={styles.cardContent}>
+                    <p><strong>Calories:</strong> {item.calories}</p>
+                    <p><strong>Quantity:</strong> {item.quantity}g</p>
+                    
+                    {item.fcpAmount && (
+                      <div>
+                        <p><strong>Macros per 100g:</strong></p>
+                        <ul style={styles.macroList}>
+                          <li>Fat: {item.fcpAmount.fat || 0}g</li>
+                          <li>Carbs: {item.fcpAmount.carbs || 0}g</li>
+                          <li>Protein: {item.fcpAmount.protein || 0}g</li>
+                        </ul>
                       </div>
-                    </div>
-                  )}
-                  
-                  {/* Display Dimensions Object */}
-                  {item.dimensions && (
-                    <p>
-                      <strong>Dimensions:</strong> {item.dimensions.length} × {item.dimensions.width} × {item.dimensions.height} {item.dimensions.unit}
+                    )}
+                    
+                    <p style={styles.date}>
+                      Added: {new Date(item.createdAt).toLocaleDateString()}
                     </p>
-                  )}
-                  
-                  {/* Display Date */}
-                  <p><strong>Created:</strong> {new Date(item.createdAt).toLocaleDateString()}</p>
-                  
-                  {/* Action Buttons */}
-                  <div className="item-actions">
-                    <button onClick={() => this.editItem(item)}>Edit</button>
-                    <button onClick={() => this.deleteItem(item._id)}>Delete</button>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>
     );
   }
 }
+
+// Styles object for better organization
+const styles = {
+  container: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '20px',
+    fontFamily: 'Arial, sans-serif'
+  },
+  form: {
+    backgroundColor: '#f5f5f5',
+    padding: '20px',
+    borderRadius: '8px',
+    marginBottom: '30px'
+  },
+  formGroup: {
+    marginBottom: '15px'
+  },
+  input: {
+    width: '100%',
+    padding: '8px',
+    marginTop: '5px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '16px'
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '4px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    marginTop: '10px'
+  },
+  itemsList: {
+    marginTop: '30px'
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gap: '20px',
+    marginTop: '20px'
+  },
+  card: {
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    padding: '15px',
+    backgroundColor: 'white',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  },
+  cardTitle: {
+    marginTop: 0,
+    color: '#333',
+    borderBottom: '2px solid #4CAF50',
+    paddingBottom: '10px'
+  },
+  cardContent: {
+    color: '#666'
+  },
+  macroList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: '10px 0'
+  },
+  date: {
+    fontSize: '12px',
+    color: '#999',
+    marginTop: '10px'
+  },
+  error: {
+    backgroundColor: '#ffebee',
+    color: '#c62828',
+    padding: '10px',
+    borderRadius: '4px',
+    marginBottom: '20px'
+  },
+  loading: {
+    backgroundColor: '#e3f2fd',
+    color: '#1565c0',
+    padding: '10px',
+    borderRadius: '4px',
+    marginBottom: '20px'
+  }
+};
 
 export default ItemManager;

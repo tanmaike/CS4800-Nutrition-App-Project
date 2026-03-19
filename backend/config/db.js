@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/your_database');
+    await mongoose.connect('mongodb://127.0.0.1:27017/nutrition_app');
     console.log('MongoDB Connected Successfully');
   } catch (error) {
     console.error('MongoDB Connection Failed:', error);
