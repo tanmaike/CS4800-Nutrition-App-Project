@@ -115,7 +115,7 @@ class FoodCatalog extends Component {
         return (
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <h1>🍽️ Food Catalog</h1>
+                    <h1>Food Catalog</h1>
                     <p style={styles.subtitle}>Browse and search through our collection of food items</p>
                 </div>
                 
@@ -305,7 +305,7 @@ const styles = {
         marginBottom: '30px'
     },
     subtitle: {
-        color: '#666',
+        color: '#121212',
         fontSize: '14px'
     },
     controls: {

@@ -14,7 +14,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
         <>
             <nav style={styles.nav}>
                 <div style={styles.logo}>
-                    🍎 Nutrition App
+                   UCNFC
                 </div>
                 
                 <div style={styles.navLinks}>
@@ -25,7 +25,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                             ...(currentPage === 'catalog' && styles.activeNavButton)
                         }}
                     >
-                        📚 Food Catalog
+                        Food Catalog
                     </button>
                     <button
                         onClick={() => onPageChange('add')}
@@ -34,7 +34,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                             ...(currentPage === 'add' && styles.activeNavButton)
                         }}
                     >
-                        ➕ Add Food Item
+                        Add Food Item
                     </button>
                 </div>
                 
@@ -82,7 +82,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#2c3e50',
+        backgroundColor: '#008550',
         padding: '15px 30px',
         color: 'white',
         marginBottom: '30px',
@@ -104,14 +104,16 @@ const styles = {
         backgroundColor: 'transparent',
         color: 'white',
         border: '1px solid rgba(255,255,255,0.3)',
+        backgroundColor: '#006b40',
         borderRadius: '4px',
         cursor: 'pointer',
         fontSize: '14px',
         transition: 'all 0.3s'
     },
     activeNavButton: {
-        backgroundColor: '#4CAF50',
-        borderColor: '#4CAF50'
+        backgroundColor: '#FFC036',
+        color: "black",
+        borderColor: '#black'
     },
     userSection: {
         display: 'flex',
@@ -123,14 +125,14 @@ const styles = {
         gap: '10px'
     },
     userName: {
-        color: '#4CAF50',
+        color: '#FFFFFF',
         fontWeight: 'bold',
         fontSize: '14px'
     },
     loginBtn: {
         padding: '8px 16px',
-        backgroundColor: '#4CAF50',
-        color: 'white',
+        backgroundColor: '#97edcb',
+        color: 'black',
         border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
@@ -139,7 +141,7 @@ const styles = {
     },
     logoutBtn: {
         padding: '6px 12px',
-        backgroundColor: '#e74c3c',
+        backgroundColor: '#b52b4c',
         color: 'white',
         border: 'none',
         borderRadius: '4px',

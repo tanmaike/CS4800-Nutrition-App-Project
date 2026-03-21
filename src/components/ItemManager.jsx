@@ -111,7 +111,7 @@ class ItemManager extends Component {
         return (
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <h1>➕ Add New Food Item</h1>
+                    <h1>Add New Food Item</h1>
                     <p style={styles.subtitle}>
                         {isLoggedIn 
                             ? "Share nutritious food items with our community" 
@@ -130,7 +130,7 @@ class ItemManager extends Component {
                     {!isLoggedIn && (
                         <div style={styles.authOverlay}>
                             <p style={styles.authMessage}>
-                                🔒 You need to be logged in to add food items
+                                You need to be logged in to add food items
                             </p>
                             <p style={styles.authHint}>
                                 Click "Login / Register" in the navigation bar above
