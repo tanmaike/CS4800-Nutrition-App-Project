@@ -3,7 +3,6 @@ import axios from 'axios';
 import Navigation from './components/Navigation';
 import FoodCatalog from './components/FoodCatalog';
 import ItemManager from './components/ItemManager';
-import './App.css';
 
 axios.defaults.withCredentials = true;
 

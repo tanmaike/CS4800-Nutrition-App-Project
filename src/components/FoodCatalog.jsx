@@ -292,21 +292,25 @@ class FoodCatalog extends Component {
         );
     }
 }
+// Replace the styles object in FoodCatalog.jsx with:
 
 const styles = {
     container: {
         maxWidth: '1200px',
         margin: '0 auto',
         padding: '20px',
-        fontFamily: 'Arial, sans-serif'
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif',
+        backgroundColor: 'white',
+        color: '#0c0c0c'
     },
     header: {
         textAlign: 'center',
         marginBottom: '30px'
     },
     subtitle: {
-        color: '#121212',
-        fontSize: '14px'
+        color: '#666',
+        fontSize: '14px',
+        marginTop: '8px'
     },
     controls: {
         display: 'flex',
@@ -325,7 +329,8 @@ const styles = {
         padding: '10px',
         border: '1px solid #ddd',
         borderRadius: '4px',
-        fontSize: '16px'
+        fontSize: '16px',
+        fontFamily: 'inherit'
     },
     sortBox: {
         display: 'flex',
@@ -340,7 +345,9 @@ const styles = {
         border: '1px solid #ddd',
         borderRadius: '4px',
         fontSize: '14px',
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        fontFamily: 'inherit',
+        cursor: 'pointer'
     },
     stats: {
         textAlign: 'center',
@@ -367,13 +374,13 @@ const styles = {
     },
     cardTitle: {
         margin: '0 0 15px 0',
-        color: '#333',
+        color: '#0c0c0c',
         fontSize: '20px',
-        borderBottom: '2px solid #4CAF50',
+        borderBottom: '2px solid #ffc036',
         paddingBottom: '8px'
     },
     cardContent: {
-        color: '#666'
+        color: '#0c0c0c'
     },
     nutritionSummary: {
         display: 'grid',
@@ -396,7 +403,7 @@ const styles = {
     nutritionValue: {
         fontSize: '14px',
         fontWeight: 'bold',
-        color: '#333'
+        color: '#0c0c0c'
     },
     metadata: {
         borderTop: '1px solid #eee',
@@ -406,7 +413,7 @@ const styles = {
     },
     creator: {
         margin: '5px 0',
-        color: '#888'
+        color: '#666'
     },
     date: {
         margin: '5px 0',
@@ -444,12 +451,12 @@ const styles = {
         cursor: 'pointer',
         color: '#999',
         ':hover': {
-            color: '#333'
+            color: '#0c0c0c'
         }
     },
     modalTitle: {
         marginTop: 0,
-        color: '#333',
+        color: '#0c0c0c',
         fontSize: '28px'
     },
     modalContent: {
@@ -467,7 +474,8 @@ const styles = {
     macroLabel: {
         marginBottom: '5px',
         fontWeight: 'bold',
-        fontSize: '14px'
+        fontSize: '14px',
+        color: '#0c0c0c'
     },
     macroBarBg: {
         backgroundColor: '#f0f0f0',

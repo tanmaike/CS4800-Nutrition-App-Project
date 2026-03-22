@@ -249,12 +249,16 @@ class ItemManager extends Component {
     }
 }
 
+// Replace the styles object in ItemManager.jsx with:
+
 const styles = {
     container: {
         maxWidth: '800px',
         margin: '0 auto',
         padding: '20px',
-        fontFamily: 'Arial, sans-serif'
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif',
+        backgroundColor: 'white',
+        color: '#0c0c0c'
     },
     header: {
         textAlign: 'center',
@@ -262,7 +266,8 @@ const styles = {
     },
     subtitle: {
         color: '#666',
-        fontSize: '14px'
+        fontSize: '14px',
+        marginTop: '8px'
     },
     form: {
         backgroundColor: '#f9f9f9',
@@ -311,6 +316,7 @@ const styles = {
         border: '1px solid #ddd',
         borderRadius: '4px',
         fontSize: '16px',
+        fontFamily: 'inherit',
         boxSizing: 'border-box'
     },
     disabled: {
@@ -320,14 +326,17 @@ const styles = {
     },
     button: {
         width: '100%',
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#008550',
         color: 'white',
         padding: '12px',
         border: 'none',
         borderRadius: '4px',
         fontSize: '16px',
         cursor: 'pointer',
-        marginTop: '10px'
+        marginTop: '10px',
+        transition: 'background-color 0.3s ease',
+        fontFamily: 'inherit',
+        fontWeight: '500'
     },
     disabledBtn: {
         backgroundColor: '#cccccc',
@@ -336,7 +345,7 @@ const styles = {
     sectionTitle: {
         marginTop: '20px',
         marginBottom: '15px',
-        color: '#333'
+        color: '#0c0c0c'
     },
     success: {
         backgroundColor: '#e8f5e9',

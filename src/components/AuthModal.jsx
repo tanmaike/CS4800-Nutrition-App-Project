@@ -133,6 +133,8 @@ class AuthModal extends Component {
     }
 }
 
+// Update the styles object in AuthModal.jsx:
+
 const styles = {
     overlay: {
         position: 'fixed',
@@ -166,7 +168,8 @@ const styles = {
     },
     title: {
         marginBottom: '20px',
-        textAlign: 'center'
+        textAlign: 'center',
+        color: '#0c0c0c'
     },
     formGroup: {
         marginBottom: '15px'
@@ -177,18 +180,22 @@ const styles = {
         border: '1px solid #ddd',
         borderRadius: '4px',
         fontSize: '16px',
-        marginTop: '5px'
+        marginTop: '5px',
+        fontFamily: 'inherit'
     },
     button: {
         width: '100%',
         padding: '10px',
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#008550',
         color: 'white',
         border: 'none',
         borderRadius: '4px',
         fontSize: '16px',
         cursor: 'pointer',
-        marginTop: '10px'
+        marginTop: '10px',
+        transition: 'background-color 0.3s ease',
+        fontFamily: 'inherit',
+        fontWeight: '500'
     },
     error: {
         backgroundColor: '#ffebee',
@@ -204,9 +211,10 @@ const styles = {
     toggleBtn: {
         background: 'none',
         border: 'none',
-        color: '#4CAF50',
+        color: '#008550',
         cursor: 'pointer',
-        textDecoration: 'underline'
+        textDecoration: 'underline',
+        fontFamily: 'inherit'
     }
 };
 

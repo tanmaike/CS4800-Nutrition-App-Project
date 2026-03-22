@@ -14,7 +14,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
         <>
             <nav style={styles.nav}>
                 <div style={styles.logo}>
-                   UCNFC
+                    🍎 Nutrition App
                 </div>
                 
                 <div style={styles.navLinks}>
@@ -22,19 +22,41 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                         onClick={() => onPageChange('catalog')}
                         style={{
                             ...styles.navButton,
-                            ...(currentPage === 'catalog' && styles.activeNavButton)
+                            ...(currentPage === 'catalog' && styles.activeNavButton),
+                            ...(currentPage !== 'catalog' && styles.inactiveNavButton)
+                        }}
+                        onMouseEnter={(e) => {
+                            if (currentPage !== 'catalog') {
+                                e.target.style.backgroundColor = '#006340';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (currentPage !== 'catalog') {
+                                e.target.style.backgroundColor = '#008550';
+                            }
                         }}
                     >
-                        Food Catalog
+                        📚 Food Catalog
                     </button>
                     <button
                         onClick={() => onPageChange('add')}
                         style={{
                             ...styles.navButton,
-                            ...(currentPage === 'add' && styles.activeNavButton)
+                            ...(currentPage === 'add' && styles.activeNavButton),
+                            ...(currentPage !== 'add' && styles.inactiveNavButton)
+                        }}
+                        onMouseEnter={(e) => {
+                            if (currentPage !== 'add') {
+                                e.target.style.backgroundColor = '#006340';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (currentPage !== 'add') {
+                                e.target.style.backgroundColor = '#008550';
+                            }
                         }}
                     >
-                        Add Food Item
+                        ➕ Add Food Item
                     </button>
                 </div>
                 
@@ -93,7 +115,8 @@ const styles = {
     logo: {
         fontSize: '20px',
         fontWeight: 'bold',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        color: 'white'
     },
     navLinks: {
         display: 'flex',
@@ -101,19 +124,20 @@ const styles = {
     },
     navButton: {
         padding: '8px 16px',
-        backgroundColor: 'transparent',
-        color: 'white',
-        border: '1px solid rgba(255,255,255,0.3)',
-        backgroundColor: '#006b40',
         borderRadius: '4px',
         cursor: 'pointer',
         fontSize: '14px',
-        transition: 'all 0.3s'
+        border: 'none',
+        transition: 'all 0.3s ease',
+        fontWeight: '500'
     },
     activeNavButton: {
-        backgroundColor: '#FFC036',
-        color: "black",
-        borderColor: '#black'
+        backgroundColor: '#ffc036',
+        color: '#0c0c0c'
+    },
+    inactiveNavButton: {
+        backgroundColor: '#008550',
+        color: 'white'
     },
     userSection: {
         display: 'flex',
@@ -125,29 +149,30 @@ const styles = {
         gap: '10px'
     },
     userName: {
-        color: '#FFFFFF',
+        color: 'white',
         fontWeight: 'bold',
         fontSize: '14px'
     },
     loginBtn: {
         padding: '8px 16px',
-        backgroundColor: '#97edcb',
-        color: 'black',
+        backgroundColor: '#ffc036',
+        color: '#0c0c0c',
         border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
         fontSize: '14px',
-        transition: 'background-color 0.3s'
+        fontWeight: '500',
+        transition: 'background-color 0.3s ease'
     },
     logoutBtn: {
         padding: '6px 12px',
-        backgroundColor: '#b52b4c',
+        backgroundColor: '#e74c3c',
         color: 'white',
         border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
         fontSize: '12px',
-        transition: 'background-color 0.3s'
+        transition: 'background-color 0.3s ease'
     }
 };
 
