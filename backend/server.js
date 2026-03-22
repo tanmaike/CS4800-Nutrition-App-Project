@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require('./config/db');
 const itemRoutes = require('./routes/itemRoutes');
 const userRoutes = require('./routes/userRoutes');
+const locationRoutes = require('./routes/locationRoutes');
 const cors = require('cors');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -50,6 +51,7 @@ app.get('/api/test', (req, res) => {
 // Routes
 app.use('/api', itemRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api', locationRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

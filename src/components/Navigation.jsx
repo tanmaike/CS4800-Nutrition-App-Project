@@ -13,54 +13,82 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
     return (
         <>
             <nav style={styles.nav}>
-                <div style={styles.logo}>
-                    🍎 Nutrition App
+                {/* Left Section - Logo/Title */}
+                <div style={styles.leftSection}>
+                    <div style={styles.logo}>
+                        🍎 Nutrition App
+                    </div>
                 </div>
                 
-                <div style={styles.navLinks}>
-                    <button
-                        onClick={() => onPageChange('catalog')}
-                        style={{
-                            ...styles.navButton,
-                            ...(currentPage === 'catalog' && styles.activeNavButton),
-                            ...(currentPage !== 'catalog' && styles.inactiveNavButton)
-                        }}
-                        onMouseEnter={(e) => {
-                            if (currentPage !== 'catalog') {
-                                e.target.style.backgroundColor = '#006340';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            if (currentPage !== 'catalog') {
-                                e.target.style.backgroundColor = '#008550';
-                            }
-                        }}
-                    >
-                        📚 Food Catalog
-                    </button>
-                    <button
-                        onClick={() => onPageChange('add')}
-                        style={{
-                            ...styles.navButton,
-                            ...(currentPage === 'add' && styles.activeNavButton),
-                            ...(currentPage !== 'add' && styles.inactiveNavButton)
-                        }}
-                        onMouseEnter={(e) => {
-                            if (currentPage !== 'add') {
-                                e.target.style.backgroundColor = '#006340';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            if (currentPage !== 'add') {
-                                e.target.style.backgroundColor = '#008550';
-                            }
-                        }}
-                    >
-                        ➕ Add Food Item
-                    </button>
+                {/* Center Section - Navigation Buttons */}
+                <div style={styles.centerSection}>
+                    <div style={styles.navLinks}>
+                        <button
+                            onClick={() => onPageChange('catalog')}
+                            style={{
+                                ...styles.navButton,
+                                ...(currentPage === 'catalog' && styles.activeNavButton),
+                                ...(currentPage !== 'catalog' && styles.inactiveNavButton)
+                            }}
+                            onMouseEnter={(e) => {
+                                if (currentPage !== 'catalog') {
+                                    e.target.style.backgroundColor = '#006340';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (currentPage !== 'catalog') {
+                                    e.target.style.backgroundColor = '#008550';
+                                }
+                            }}
+                        >
+                            📚 Food Catalog
+                        </button>
+                        <button
+                            onClick={() => onPageChange('add')}
+                            style={{
+                                ...styles.navButton,
+                                ...(currentPage === 'add' && styles.activeNavButton),
+                                ...(currentPage !== 'add' && styles.inactiveNavButton)
+                            }}
+                            onMouseEnter={(e) => {
+                                if (currentPage !== 'add') {
+                                    e.target.style.backgroundColor = '#006340';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (currentPage !== 'add') {
+                                    e.target.style.backgroundColor = '#008550';
+                                }
+                            }}
+                        >
+                            ➕ Add Food Item
+                        </button>
+                        <button
+                            onClick={() => onPageChange('distance')}
+                            style={{
+                                ...styles.navButton,
+                                ...(currentPage === 'distance' && styles.activeNavButton),
+                                ...(currentPage !== 'distance' && styles.inactiveNavButton)
+                            }}
+                            onMouseEnter={(e) => {
+                                if (currentPage !== 'distance') {
+                                    e.target.style.backgroundColor = '#006340';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (currentPage !== 'distance') {
+                                    e.target.style.backgroundColor = '#008550';
+                                }
+                            }}
+                        >
+                            📏 Distance Calculator
+                        </button>
+                    </div>
+                    
                 </div>
                 
-                <div style={styles.userSection}>
+                {/* Right Section - User Authentication */}
+                <div style={styles.rightSection}>
                     {user ? (
                         <div style={styles.userInfo}>
                             <span style={styles.userName}>
@@ -108,19 +136,40 @@ const styles = {
         padding: '15px 30px',
         color: 'white',
         marginBottom: '30px',
-        flexWrap: 'wrap',
-        gap: '15px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        gap: '20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        minHeight: '70px',
+        flexWrap: 'wrap'
+    },
+    leftSection: {
+        flex: '0 0 auto',  // Don't grow or shrink
+        display: 'flex',
+        alignItems: 'center'
+    },
+    centerSection: {
+        flex: '1 1 auto',  // Can grow and shrink
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    rightSection: {
+        flex: '0 0 auto',  // Don't grow or shrink
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center'
     },
     logo: {
         fontSize: '20px',
         fontWeight: 'bold',
         cursor: 'pointer',
-        color: 'white'
+        color: 'white',
+        whiteSpace: 'nowrap'
     },
     navLinks: {
         display: 'flex',
-        gap: '10px'
+        gap: '10px',
+        flexWrap: 'wrap',
+        justifyContent: 'center'
     },
     navButton: {
         padding: '8px 16px',
@@ -129,7 +178,8 @@ const styles = {
         fontSize: '14px',
         border: 'none',
         transition: 'all 0.3s ease',
-        fontWeight: '500'
+        fontWeight: '500',
+        whiteSpace: 'nowrap'
     },
     activeNavButton: {
         backgroundColor: '#ffc036',
@@ -139,10 +189,6 @@ const styles = {
         backgroundColor: '#008550',
         color: 'white'
     },
-    userSection: {
-        display: 'flex',
-        alignItems: 'center'
-    },
     userInfo: {
         display: 'flex',
         alignItems: 'center',
@@ -151,7 +197,8 @@ const styles = {
     userName: {
         color: 'white',
         fontWeight: 'bold',
-        fontSize: '14px'
+        fontSize: '14px',
+        whiteSpace: 'nowrap'
     },
     loginBtn: {
         padding: '8px 16px',
@@ -162,7 +209,8 @@ const styles = {
         cursor: 'pointer',
         fontSize: '14px',
         fontWeight: '500',
-        transition: 'background-color 0.3s ease'
+        transition: 'background-color 0.3s ease',
+        whiteSpace: 'nowrap'
     },
     logoutBtn: {
         padding: '6px 12px',
@@ -172,7 +220,28 @@ const styles = {
         borderRadius: '4px',
         cursor: 'pointer',
         fontSize: '12px',
-        transition: 'background-color 0.3s ease'
+        transition: 'background-color 0.3s ease',
+        whiteSpace: 'nowrap'
+    },
+    // Responsive design
+    '@media (max-width: 768px)': {
+        nav: {
+            flexDirection: 'column',
+            gap: '15px',
+            textAlign: 'center'
+        },
+        leftSection: {
+            justifyContent: 'center'
+        },
+        centerSection: {
+            width: '100%'
+        },
+        rightSection: {
+            justifyContent: 'center'
+        },
+        userInfo: {
+            justifyContent: 'center'
+        }
     }
 };
 

@@ -228,61 +228,129 @@ class FoodCatalog extends Component {
                         <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
                             <button style={styles.closeBtn} onClick={this.closeItemModal}>×</button>
                             
-                            <h2 style={styles.modalTitle}>{selectedItem.name}</h2>
+                            {/* Green Header Bar with Food Name */}
+                            <div style={styles.modalHeader}>
+                                <h2 style={styles.modalTitle}>{selectedItem.name}</h2>
+                            </div>
                             
                             <div style={styles.modalContent}>
+                                {/* Basic Information Section */}
                                 <div style={styles.modalSection}>
-                                    <h3>Basic Information</h3>
-                                    <p><strong>Calories:</strong> {selectedItem.calories} kcal</p>
-                                    <p><strong>Serving Size:</strong> {selectedItem.quantity}g</p>
+                                    <h3 style={styles.sectionTitle}>📊 Basic Information</h3>
+                                    <div style={styles.infoGrid}>
+                                        <div style={styles.infoCard}>
+                                            <span style={styles.infoLabel}>Calories</span>
+                                            <span style={styles.infoValue}>{selectedItem.calories} kcal</span>
+                                        </div>
+                                        <div style={styles.infoCard}>
+                                            <span style={styles.infoLabel}>Serving Size</span>
+                                            <span style={styles.infoValue}>{selectedItem.quantity}g</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 
+                                {/* Macronutrients Section with Yellow Accents */}
                                 <div style={styles.modalSection}>
-                                    <h3>Macronutrients (per 100g)</h3>
+                                    <h3 style={styles.sectionTitle}>🥗 Macronutrients (per 100g)</h3>
                                     <div style={styles.macroDetails}>
+                                        {/* Protein Bar */}
                                         <div style={styles.macroBar}>
-                                            <div style={styles.macroLabel}>Protein:</div>
+                                            <div style={styles.macroLabel}>
+                                                <span style={styles.macroIcon}>💪</span>
+                                                Protein
+                                            </div>
                                             <div style={styles.macroBarBg}>
                                                 <div style={{
                                                     ...styles.macroBarFill,
                                                     width: `${Math.min((selectedItem.fcpAmount?.protein || 0) / 50 * 100, 100)}%`,
-                                                    backgroundColor: '#4CAF50'
+                                                    backgroundColor: '#ffc036'
                                                 }}></div>
                                             </div>
                                             <div style={styles.macroValue}>{selectedItem.fcpAmount?.protein || 0}g</div>
                                         </div>
+                                        
+                                        {/* Carbs Bar */}
                                         <div style={styles.macroBar}>
-                                            <div style={styles.macroLabel}>Carbs:</div>
+                                            <div style={styles.macroLabel}>
+                                                <span style={styles.macroIcon}>🌾</span>
+                                                Carbohydrates
+                                            </div>
                                             <div style={styles.macroBarBg}>
                                                 <div style={{
                                                     ...styles.macroBarFill,
                                                     width: `${Math.min((selectedItem.fcpAmount?.carbs || 0) / 100 * 100, 100)}%`,
-                                                    backgroundColor: '#FFC107'
+                                                    backgroundColor: '#ffc036'
                                                 }}></div>
                                             </div>
                                             <div style={styles.macroValue}>{selectedItem.fcpAmount?.carbs || 0}g</div>
                                         </div>
+                                        
+                                        {/* Fat Bar */}
                                         <div style={styles.macroBar}>
-                                            <div style={styles.macroLabel}>Fat:</div>
+                                            <div style={styles.macroLabel}>
+                                                <span style={styles.macroIcon}>🥑</span>
+                                                Fat
+                                            </div>
                                             <div style={styles.macroBarBg}>
                                                 <div style={{
                                                     ...styles.macroBarFill,
                                                     width: `${Math.min((selectedItem.fcpAmount?.fat || 0) / 50 * 100, 100)}%`,
-                                                    backgroundColor: '#F44336'
+                                                    backgroundColor: '#ffc036'
                                                 }}></div>
                                             </div>
                                             <div style={styles.macroValue}>{selectedItem.fcpAmount?.fat || 0}g</div>
                                         </div>
                                     </div>
+                                    
+                                    {/* Total Calories Breakdown */}
+                                    <div style={styles.caloriesBreakdown}>
+                                        <div style={styles.breakdownTitle}>Calorie Distribution</div>
+                                        <div style={styles.breakdownBar}>
+                                            <div style={{
+                                                ...styles.breakdownFill,
+                                                width: `${((selectedItem.fcpAmount?.protein || 0) * 4) / selectedItem.calories * 100}%`,
+                                                backgroundColor: '#ffc036'
+                                            }}></div>
+                                            <div style={{
+                                                ...styles.breakdownFill,
+                                                width: `${((selectedItem.fcpAmount?.carbs || 0) * 4) / selectedItem.calories * 100}%`,
+                                                backgroundColor: '#ffc036',
+                                                opacity: 0.8
+                                            }}></div>
+                                            <div style={{
+                                                ...styles.breakdownFill,
+                                                width: `${((selectedItem.fcpAmount?.fat || 0) * 9) / selectedItem.calories * 100}%`,
+                                                backgroundColor: '#ffc036',
+                                                opacity: 0.6
+                                            }}></div>
+                                        </div>
+                                        <div style={styles.breakdownLegend}>
+                                            <span>💪 Protein ({Math.round(((selectedItem.fcpAmount?.protein || 0) * 4) / selectedItem.calories * 100)}%)</span>
+                                            <span>🌾 Carbs ({Math.round(((selectedItem.fcpAmount?.carbs || 0) * 4) / selectedItem.calories * 100)}%)</span>
+                                            <span>🥑 Fat ({Math.round(((selectedItem.fcpAmount?.fat || 0) * 9) / selectedItem.calories * 100)}%)</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 
+                                {/* Additional Information Section */}
                                 <div style={styles.modalSection}>
-                                    <h3>Additional Information</h3>
-                                    <p><strong>Added by:</strong> {selectedItem.createdByUsername || 'Unknown'}</p>
-                                    <p><strong>Added on:</strong> {new Date(selectedItem.createdAt).toLocaleString()}</p>
-                                    {selectedItem.updatedAt && selectedItem.updatedAt !== selectedItem.createdAt && (
-                                        <p><strong>Last updated:</strong> {new Date(selectedItem.updatedAt).toLocaleString()}</p>
-                                    )}
+                                    <h3 style={styles.sectionTitle}>ℹ️ Additional Information</h3>
+                                    <div style={styles.infoGrid}>
+                                        <div style={styles.infoRow}>
+                                            <span style={styles.infoLabel}>Added by:</span>
+                                            <span style={styles.infoText}>{selectedItem.createdByUsername || 'Unknown'}</span>
+                                        </div>
+                                        <div style={styles.infoRow}>
+                                            <span style={styles.infoLabel}>Added on:</span>
+                                            <span style={styles.infoText}>{new Date(selectedItem.createdAt).toLocaleString()}</span>
+                                        </div>
+                                        {selectedItem.updatedAt && selectedItem.updatedAt !== selectedItem.createdAt && (
+                                            <div style={styles.infoRow}>
+                                                <span style={styles.infoLabel}>Last updated:</span>
+                                                <span style={styles.infoText}>{new Date(selectedItem.updatedAt).toLocaleString()}</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -292,6 +360,7 @@ class FoodCatalog extends Component {
         );
     }
 }
+
 // Replace the styles object in FoodCatalog.jsx with:
 
 const styles = {
@@ -511,6 +580,145 @@ const styles = {
         textAlign: 'center',
         padding: '40px',
         color: '#999'
+    },
+
+    // Add to the styles object in FoodCatalog.jsx
+
+    modalHeader: {
+        backgroundColor: '#008550',
+        padding: '20px',
+        margin: '-30px -30px 20px -30px', // Negative margin to extend to modal edges
+        borderRadius: '12px 12px 0 0',
+        textAlign: 'center'
+    },
+    modalTitle: {
+        margin: 0,
+        color: 'white',
+        fontSize: '28px',
+        fontWeight: 'bold'
+    },
+    modalContent: {
+        marginTop: '20px'
+    },
+    modalSection: {
+        marginBottom: '30px',
+        padding: '0 10px'
+    },
+    sectionTitle: {
+        color: '#0c0c0c',
+        fontSize: '18px',
+        fontWeight: 'bold',
+        marginBottom: '15px',
+        borderLeft: `4px solid #ffc036`,
+        paddingLeft: '12px'
+    },
+    infoGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '15px'
+    },
+    infoCard: {
+        backgroundColor: '#f5f5f5',
+        padding: '12px',
+        borderRadius: '8px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px'
+    },
+    infoRow: {
+        backgroundColor: '#f9f9f9',
+        padding: '10px',
+        borderRadius: '6px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    infoLabel: {
+        fontWeight: 'bold',
+        color: '#666',
+        fontSize: '13px'
+    },
+    infoValue: {
+        fontSize: '18px',
+        fontWeight: 'bold',
+        color: '#008550'
+    },
+    infoText: {
+        color: '#0c0c0c'
+    },
+    macroDetails: {
+        marginTop: '10px'
+    },
+    macroBar: {
+        marginBottom: '20px'
+    },
+    macroLabel: {
+        marginBottom: '8px',
+        fontWeight: 'bold',
+        fontSize: '14px',
+        color: '#0c0c0c',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+    },
+    macroIcon: {
+        fontSize: '16px'
+    },
+    macroBarBg: {
+        backgroundColor: '#f0f0f0',
+        height: '30px',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        marginBottom: '5px'
+    },
+    macroBarFill: {
+        height: '100%',
+        transition: 'width 0.3s ease',
+        borderRadius: '15px'
+    },
+    macroValue: {
+        fontSize: '13px',
+        color: '#666',
+        textAlign: 'right',
+        fontWeight: 'bold'
+    },
+    caloriesBreakdown: {
+        marginTop: '25px',
+        padding: '15px',
+        backgroundColor: '#f9f9f9',
+        borderRadius: '8px'
+    },
+    breakdownTitle: {
+        fontSize: '13px',
+        fontWeight: 'bold',
+        color: '#666',
+        marginBottom: '10px'
+    },
+    breakdownBar: {
+        display: 'flex',
+        height: '24px',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        marginBottom: '10px'
+    },
+    breakdownFill: {
+        height: '100%',
+        transition: 'width 0.3s ease'
+    },
+    breakdownLegend: {
+        display: 'flex',
+        gap: '15px',
+        fontSize: '11px',
+        color: '#666',
+        flexWrap: 'wrap'
+    },
+    legendColor: {
+        display: 'inline-block',
+        width: '12px',
+        height: '12px',
+        borderRadius: '2px',
+        marginRight: '5px',
+        backgroundColor: '#ffc036'
     }
 };
 

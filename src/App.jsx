@@ -3,6 +3,7 @@ import axios from 'axios';
 import Navigation from './components/Navigation';
 import FoodCatalog from './components/FoodCatalog';
 import ItemManager from './components/ItemManager';
+import DistanceCalculator from './components/DistanceCalculator';
 
 axios.defaults.withCredentials = true;
 
@@ -85,15 +86,16 @@ class App extends Component {
                     onLoginSuccess={this.handleLoginSuccess}
                     onLogout={this.handleLogout}
                 />
-                
                 {currentPage === 'catalog' ? (
                     <FoodCatalog key={currentPage} />
-                ) : (
+                ) : currentPage === 'add' ? (
                     <ItemManager 
                         user={user}
                         onLoginSuccess={this.handleLoginSuccess}
                         onItemAdded={this.handleItemAdded}
                     />
+                ) : (
+                    <DistanceCalculator user={user} />
                 )}
             </div>
         );
