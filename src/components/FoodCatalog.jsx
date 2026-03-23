@@ -208,11 +208,11 @@ class FoodCatalog extends Component {
                                         <div style={styles.metadata}>
                                             {item.createdByUsername && (
                                                 <p style={styles.creator}>
-                                                    👤 {item.createdByUsername}
+                                                    Added By: {item.createdByUsername}
                                                 </p>
                                             )}
                                             <p style={styles.date}>
-                                                📅 {new Date(item.createdAt).toLocaleDateString()}
+                                                Date Added: {new Date(item.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
@@ -236,7 +236,7 @@ class FoodCatalog extends Component {
                             <div style={styles.modalContent}>
                                 {/* Basic Information Section */}
                                 <div style={styles.modalSection}>
-                                    <h3 style={styles.sectionTitle}>📊 Basic Information</h3>
+                                    <h3 style={styles.sectionTitle}>Basic Information</h3>
                                     <div style={styles.infoGrid}>
                                         <div style={styles.infoCard}>
                                             <span style={styles.infoLabel}>Calories</span>
@@ -251,12 +251,12 @@ class FoodCatalog extends Component {
                                 
                                 {/* Macronutrients Section with Yellow Accents */}
                                 <div style={styles.modalSection}>
-                                    <h3 style={styles.sectionTitle}>🥗 Macronutrients (per 100g)</h3>
+                                    <h3 style={styles.sectionTitle}>Macronutrients (per 100g)</h3>
                                     <div style={styles.macroDetails}>
                                         {/* Protein Bar */}
                                         <div style={styles.macroBar}>
                                             <div style={styles.macroLabel}>
-                                                <span style={styles.macroIcon}>💪</span>
+                                                <span style={styles.macroIcon}></span>
                                                 Protein
                                             </div>
                                             <div style={styles.macroBarBg}>
@@ -272,7 +272,7 @@ class FoodCatalog extends Component {
                                         {/* Carbs Bar */}
                                         <div style={styles.macroBar}>
                                             <div style={styles.macroLabel}>
-                                                <span style={styles.macroIcon}>🌾</span>
+                                                <span style={styles.macroIcon}></span>
                                                 Carbohydrates
                                             </div>
                                             <div style={styles.macroBarBg}>
@@ -288,7 +288,7 @@ class FoodCatalog extends Component {
                                         {/* Fat Bar */}
                                         <div style={styles.macroBar}>
                                             <div style={styles.macroLabel}>
-                                                <span style={styles.macroIcon}>🥑</span>
+                                                <span style={styles.macroIcon}></span>
                                                 Fat
                                             </div>
                                             <div style={styles.macroBarBg}>
@@ -325,16 +325,16 @@ class FoodCatalog extends Component {
                                             }}></div>
                                         </div>
                                         <div style={styles.breakdownLegend}>
-                                            <span>💪 Protein ({Math.round(((selectedItem.fcpAmount?.protein || 0) * 4) / selectedItem.calories * 100)}%)</span>
-                                            <span>🌾 Carbs ({Math.round(((selectedItem.fcpAmount?.carbs || 0) * 4) / selectedItem.calories * 100)}%)</span>
-                                            <span>🥑 Fat ({Math.round(((selectedItem.fcpAmount?.fat || 0) * 9) / selectedItem.calories * 100)}%)</span>
+                                            <span>Protein ({Math.round(((selectedItem.fcpAmount?.protein || 0) * 4) / selectedItem.calories * 100)}%)</span>
+                                            <span>Carbs ({Math.round(((selectedItem.fcpAmount?.carbs || 0) * 4) / selectedItem.calories * 100)}%)</span>
+                                            <span>Fat ({Math.round(((selectedItem.fcpAmount?.fat || 0) * 9) / selectedItem.calories * 100)}%)</span>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 {/* Additional Information Section */}
                                 <div style={styles.modalSection}>
-                                    <h3 style={styles.sectionTitle}>ℹ️ Additional Information</h3>
+                                    <h3 style={styles.sectionTitle}>Additional Information</h3>
                                     <div style={styles.infoGrid}>
                                         <div style={styles.infoRow}>
                                             <span style={styles.infoLabel}>Added by:</span>

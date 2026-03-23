@@ -18,9 +18,11 @@ class DistanceCalculator extends Component {
                 name: '',
                 lat: '',
                 lng: '',
+                macrolocation: 'Other',
                 isPublic: true
             },
-            addingLocation: false
+            addingLocation: false,
+            filterMacrolocation: 'all' // 'all', 'CPP', 'Mt. SAC', 'Other'
         };
     }
 
@@ -112,6 +114,7 @@ class DistanceCalculator extends Component {
             await axios.post(`${API_URL}/locations`, {
                 name: newLocation.name,
                 coordinates: { lat, lng },
+                macrolocation: newLocation.macrolocation,
                 isPublic: newLocation.isPublic
             }, {
                 withCredentials: true
@@ -127,6 +130,7 @@ class DistanceCalculator extends Component {
                     name: '',
                     lat: '',
                     lng: '',
+                    macrolocation: 'Other',
                     isPublic: true
                 }
             });
@@ -138,16 +142,83 @@ class DistanceCalculator extends Component {
         }
     };
 
+    getMacrolocationColor = (macrolocation) => {
+        switch(macrolocation) {
+            case 'CPP':
+                return '#008550';
+            case 'Mt. SAC':
+                return '#9e1b2a';
+            default:
+                return '#ffc036';
+        }
+    };
+
+    getFilteredLocations = () => {
+        const { locations, filterMacrolocation } = this.state;
+        if (filterMacrolocation === 'all') {
+            return locations;
+        }
+        return locations.filter(loc => loc.macrolocation === filterMacrolocation);
+    };
+
     render() {
-        const { locations, originId, destinationId, result, loading, error, showForm, newLocation, addingLocation } = this.state;
+        const { locations, originId, destinationId, result, loading, error, showForm, newLocation, addingLocation, filterMacrolocation } = this.state;
         const { user } = this.props;
         const isLoggedIn = !!user;
+        const filteredLocations = this.getFilteredLocations();
+        
+        // Group locations by macrolocation for display
+        const groupedLocations = {
+            'CPP': filteredLocations.filter(loc => loc.macrolocation === 'CPP'),
+            'Mt. SAC': filteredLocations.filter(loc => loc.macrolocation === 'Mt. SAC'),
+            'Other': filteredLocations.filter(loc => loc.macrolocation === 'Other')
+        };
         
         return (
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <h1>📍 Distance Calculator</h1>
-                    <p style={styles.subtitle}>Calculate distances between locations in miles and steps</p>
+                    <h1>Distance Calculator</h1>
+                    <p style={styles.subtitle}>Calculate distances between campus locations in miles and steps</p>
+                </div>
+                
+                {/* Filter Buttons */}
+                <div style={styles.filterContainer}>
+                    <button
+                        onClick={() => this.setState({ filterMacrolocation: 'all' })}
+                        style={{
+                            ...styles.filterButton,
+                            ...(filterMacrolocation === 'all' && styles.activeFilterButtonAll)
+                        }}
+                    >
+                        All Locations
+                    </button>
+                    <button
+                        onClick={() => this.setState({ filterMacrolocation: 'CPP' })}
+                        style={{
+                            ...styles.filterButton,
+                            ...(filterMacrolocation === 'CPP' && styles.activeFilterButtonCPP)
+                        }}
+                    >
+                        🟢 CPP
+                    </button>
+                    <button
+                        onClick={() => this.setState({ filterMacrolocation: 'Mt. SAC' })}
+                        style={{
+                            ...styles.filterButton,
+                            ...(filterMacrolocation === 'Mt. SAC' && styles.activeFilterButtonMtSAC)
+                        }}
+                    >
+                        🔴 Mt. SAC
+                    </button>
+                    <button
+                        onClick={() => this.setState({ filterMacrolocation: 'Other' })}
+                        style={{
+                            ...styles.filterButton,
+                            ...(filterMacrolocation === 'Other' && styles.activeFilterButtonOther)
+                        }}
+                    >
+                        🟡 Other
+                    </button>
                 </div>
                 
                 {/* Add Location Button - Only show if logged in */}
@@ -176,7 +247,7 @@ class DistanceCalculator extends Component {
                                 onChange={this.handleInputChange}
                                 required
                                 style={styles.input}
-                                placeholder="e.g., Building A, Central Park, Main Entrance"
+                                placeholder="e.g., Building 1, Library, Student Center"
                             />
                         </div>
                         
@@ -208,6 +279,21 @@ class DistanceCalculator extends Component {
                                     placeholder="e.g., -117.820719"
                                 />
                             </div>
+                        </div>
+                        
+                        <div style={styles.formGroup}>
+                            <label>Macrolocation *</label>
+                            <select
+                                name="macrolocation"
+                                value={newLocation.macrolocation}
+                                onChange={this.handleInputChange}
+                                required
+                                style={styles.select}
+                            >
+                                <option value="CPP">CPP (Cal Poly Pomona)</option>
+                                <option value="Mt. SAC">Mt. SAC (Mt. San Antonio College)</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                         
                         <div style={styles.checkboxGroup}>
@@ -256,9 +342,9 @@ class DistanceCalculator extends Component {
                                 style={styles.select}
                             >
                                 <option value="">Select origin...</option>
-                                {locations.map(loc => (
+                                {filteredLocations.map(loc => (
                                     <option key={loc._id} value={loc._id}>
-                                        {loc.name}
+                                        {loc.name} ({loc.macrolocation})
                                     </option>
                                 ))}
                             </select>
@@ -273,9 +359,9 @@ class DistanceCalculator extends Component {
                                 style={styles.select}
                             >
                                 <option value="">Select destination...</option>
-                                {locations.map(loc => (
+                                {filteredLocations.map(loc => (
                                     <option key={loc._id} value={loc._id}>
-                                        {loc.name}
+                                        {loc.name} ({loc.macrolocation})
                                     </option>
                                 ))}
                             </select>
@@ -284,15 +370,15 @@ class DistanceCalculator extends Component {
                     
                     <button 
                         type="submit" 
-                        disabled={loading || locations.length < 2}
+                        disabled={loading || filteredLocations.length < 2}
                         style={styles.calculateButton}
                     >
                         {loading ? 'Calculating...' : 'Calculate Distance'}
                     </button>
                     
-                    {locations.length < 2 && (
+                    {filteredLocations.length < 2 && (
                         <p style={styles.hint}>
-                            {locations.length === 0 
+                            {filteredLocations.length === 0 
                                 ? "Add at least 2 locations to calculate distances" 
                                 : "Add one more location to calculate distances"}
                         </p>
@@ -305,35 +391,47 @@ class DistanceCalculator extends Component {
                 {/* Results Display */}
                 {result && (
                     <div style={styles.resultContainer}>
-                        <h3 style={styles.resultTitle}>📏 Distance Results</h3>
+                        <h3 style={styles.resultTitle}>Distance Results</h3>
                         
                         <div style={styles.routeInfo}>
                             <div style={styles.routePoint}>
-                                <span style={styles.routeIcon}>📍</span>
-                                <div>
+                                <div style={styles.routePointContent}>
                                     <strong>From:</strong> {result.origin.name}
                                     <br />
                                     <small style={styles.coordinates}>
-                                        {result.origin.coordinates.lat}, {result.origin.coordinates.lng}
+                                        📍 {result.origin.coordinates.lat}, {result.origin.coordinates.lng}
                                     </small>
+                                    <br />
+                                    <span style={{
+                                        ...styles.macrolocationBadge,
+                                        backgroundColor: this.getMacrolocationColor(result.origin.macrolocation)
+                                    }}>
+                                        {result.origin.macrolocation}
+                                    </span>
                                 </div>
                             </div>
                             <div style={styles.routeArrow}>↓</div>
                             <div style={styles.routePoint}>
-                                <span style={styles.routeIcon}>📍</span>
-                                <div>
+                                <div style={styles.routePointContent}>
                                     <strong>To:</strong> {result.destination.name}
                                     <br />
                                     <small style={styles.coordinates}>
-                                        {result.destination.coordinates.lat}, {result.destination.coordinates.lng}
+                                        📍 {result.destination.coordinates.lat}, {result.destination.coordinates.lng}
                                     </small>
+                                    <br />
+                                    <span style={{
+                                        ...styles.macrolocationBadge,
+                                        backgroundColor: this.getMacrolocationColor(result.destination.macrolocation)
+                                    }}>
+                                        {result.destination.macrolocation}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                         
                         <div style={styles.distanceGrid}>
                             <div style={styles.distanceCard}>
-                                <span style={styles.distanceIcon}>🎯</span>
+                                <span style={styles.distanceIcon}>🚶</span>
                                 <div>
                                     <div style={styles.distanceValue}>{result.distance.miles} miles</div>
                                     <div style={styles.distanceLabel}>Straight-line Distance</div>
@@ -341,10 +439,19 @@ class DistanceCalculator extends Component {
                             </div>
                             
                             <div style={styles.distanceCard}>
-                                <span style={styles.distanceIcon}>🚶</span>
+                                <span style={styles.distanceIcon}>👣</span>
                                 <div>
                                     <div style={styles.distanceValue}>{result.distance.stepsFormatted} steps</div>
                                     <div style={styles.distanceLabel}>Walking Steps (30" intervals)</div>
+                                </div>
+                            </div>
+                            
+                            <div style={styles.distanceCard}>
+                                <span style={styles.distanceIcon}>⏱️</span>
+                                <div>
+                                    <div style={styles.distanceValue}>{result.distance.duration.text}</div>
+                                    <div style={styles.distanceLabel}>Estimated Walking Time</div>
+                                    <div style={styles.distanceSubLabel}>(at 3 mph average pace)</div>
                                 </div>
                             </div>
                         </div>
@@ -358,28 +465,52 @@ class DistanceCalculator extends Component {
                     </div>
                 )}
                 
-                {/* Locations List - Public to everyone */}
+                {/* Locations List - Grouped by Macrolocation */}
                 {locations.length > 0 && (
                     <div style={styles.locationsList}>
-                        <h3>Saved Locations ({locations.length})</h3>
-                        <div style={styles.locationGrid}>
-                            {locations.map(loc => (
-                                <div key={loc._id} style={styles.locationCard}>
-                                    <div style={styles.locationHeader}>
-                                        <strong>{loc.name}</strong>
-                                        {!loc.isPublic && (
-                                            <span style={styles.privateBadge}>Private</span>
-                                        )}
+                        <h3>Common Locations ({filteredLocations.length})</h3>
+                        
+                        {Object.entries(groupedLocations).map(([macrolocation, locs]) => (
+                            locs.length > 0 && (
+                                <div key={macrolocation}>
+                                    <h4 style={{
+                                        ...styles.macrolocationHeader,
+                                        borderLeftColor: this.getMacrolocationColor(macrolocation)
+                                    }}>
+                                        {macrolocation === 'CPP' && '🟢 '}
+                                        {macrolocation === 'Mt. SAC' && '🔴 '}
+                                        {macrolocation === 'Other' && '🟡 '}
+                                        {macrolocation} ({locs.length})
+                                    </h4>
+                                    <div style={styles.locationGrid}>
+                                        {locs.map(loc => (
+                                            <div 
+                                                key={loc._id} 
+                                                style={{
+                                                    ...styles.locationCard,
+                                                    borderLeftColor: this.getMacrolocationColor(loc.macrolocation),
+                                                    borderLeftWidth: '4px',
+                                                    borderLeftStyle: 'solid'
+                                                }}
+                                            >
+                                                <div style={styles.locationHeader}>
+                                                    <strong>{loc.name}</strong>
+                                                    {!loc.isPublic && (
+                                                        <span style={styles.privateBadge}>Private</span>
+                                                    )}
+                                                </div>
+                                                <p style={styles.coordinatesDisplay}>
+                                                    📍 {loc.coordinates.lat}, {loc.coordinates.lng}
+                                                </p>
+                                                <small style={styles.locationMeta}>
+                                                    Added by: {loc.createdByUsername || 'Unknown'}
+                                                </small>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <p style={styles.coordinatesDisplay}>
-                                        📍 {loc.coordinates.lat}, {loc.coordinates.lng}
-                                    </p>
-                                    <small style={styles.locationMeta}>
-                                        Added by: {loc.createdByUsername || 'Unknown'}
-                                    </small>
                                 </div>
-                            ))}
-                        </div>
+                            )
+                        ))}
                     </div>
                 )}
             </div>
@@ -402,6 +533,47 @@ const styles = {
         color: '#666',
         fontSize: '14px',
         marginTop: '8px'
+    },
+    filterContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '10px',
+        marginBottom: '20px',
+        flexWrap: 'wrap'
+    },
+    filterButton: {
+        padding: '8px 16px',
+        borderRadius: '20px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        border: '2px solid',
+        transition: 'all 0.3s ease',
+        backgroundColor: 'transparent'
+    },
+    // Active state for "All Locations" button
+    activeFilterButtonAll: {
+        backgroundColor: '#0c0c0c',
+        color: 'white',
+        borderColor: '#0c0c0c'
+    },
+    // Active state for CPP button
+    activeFilterButtonCPP: {
+        backgroundColor: '#008550',
+        color: 'white',
+        borderColor: '#008550'
+    },
+    // Active state for Mt. SAC button
+    activeFilterButtonMtSAC: {
+        backgroundColor: '#9e1b2a',
+        color: 'white',
+        borderColor: '#9e1b2a'
+    },
+    // Active state for Other button
+    activeFilterButtonOther: {
+        backgroundColor: '#ffc036',
+        color: '#0c0c0c',
+        borderColor: '#ffc036'
     },
     addButtonContainer: {
         textAlign: 'right',
@@ -518,22 +690,32 @@ const styles = {
     },
     routePoint: {
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         gap: '10px',
         padding: '10px'
     },
-    routeIcon: {
-        fontSize: '20px'
+    routePointContent: {
+        flex: 1
     },
     routeArrow: {
         textAlign: 'center',
         fontSize: '20px',
-        color: '#008550'
+        color: '#008550',
+        paddingLeft: '10px'
     },
     coordinates: {
         color: '#666',
         fontFamily: 'monospace',
         fontSize: '11px'
+    },
+    macrolocationBadge: {
+        display: 'inline-block',
+        padding: '2px 8px',
+        borderRadius: '12px',
+        fontSize: '10px',
+        fontWeight: 'bold',
+        color: 'white',
+        marginTop: '5px'
     },
     distanceGrid: {
         display: 'grid',
@@ -582,17 +764,29 @@ const styles = {
     locationsList: {
         marginTop: '30px'
     },
+    macrolocationHeader: {
+        marginTop: '20px',
+        marginBottom: '10px',
+        paddingLeft: '10px',
+        borderLeft: '4px solid',
+        color: '#0c0c0c'
+    },
     locationGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         gap: '15px',
-        marginTop: '15px'
+        marginBottom: '20px'
     },
     locationCard: {
         backgroundColor: '#f9f9f9',
         padding: '15px',
         borderRadius: '8px',
-        border: '1px solid #e0e0e0'
+        border: '1px solid #e0e0e0',
+        transition: 'transform 0.2s',
+        ':hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }
     },
     locationHeader: {
         display: 'flex',

@@ -13,7 +13,7 @@ const requireAuth = (req, res, next) => {
 // CREATE location - requires authentication
 router.post('/locations', requireAuth, async (req, res) => {
     try {
-        const { name, coordinates, isPublic } = req.body;
+        const { name, coordinates, macrolocation, isPublic } = req.body;
         
         // Validate coordinates
         if (!coordinates || typeof coordinates.lat !== 'number' || typeof coordinates.lng !== 'number') {
@@ -26,6 +26,7 @@ router.post('/locations', requireAuth, async (req, res) => {
                 lat: coordinates.lat,
                 lng: coordinates.lng
             },
+            macrolocation: macrolocation || 'Other',
             isPublic: isPublic !== false, // Default to true if not specified
             createdBy: req.session.user.userId,
             createdByUsername: req.session.user.username
@@ -46,6 +47,23 @@ router.get('/locations', async (req, res) => {
         const query = req.session.user 
             ? { $or: [{ isPublic: true }, { createdBy: req.session.user.userId }] }
             : { isPublic: true };
+        
+        const locations = await Location.find(query).sort({ macrolocation: 1, name: 1 });
+        res.json(locations);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching locations', error: error.message });
+    }
+});
+
+// GET locations by macrolocation - public
+router.get('/locations/macrolocation/:type', async (req, res) => {
+    try {
+        const { type } = req.params;
+        const query = { macrolocation: type, isPublic: true };
+        
+        if (req.session.user) {
+            query.$or = [{ isPublic: true }, { createdBy: req.session.user.userId }];
+        }
         
         const locations = await Location.find(query).sort({ name: 1 });
         res.json(locations);
@@ -86,9 +104,9 @@ router.put('/locations/:id', requireAuth, async (req, res) => {
             return res.status(403).json({ message: 'Not authorized' });
         }
         
-        const { name, coordinates, isPublic } = req.body;
+        const { name, coordinates, macrolocation, isPublic } = req.body;
         
-        const updateData = { name, isPublic };
+        const updateData = { name, macrolocation, isPublic };
         if (coordinates && typeof coordinates.lat === 'number' && typeof coordinates.lng === 'number') {
             updateData.coordinates = coordinates;
         }
@@ -125,7 +143,7 @@ router.delete('/locations/:id', requireAuth, async (req, res) => {
     }
 });
 
-// Calculate distance between two locations - public (no authentication required)
+// Calculate distance between two points - public (no authentication required)
 router.post('/calculate-distance', async (req, res) => {
     try {
         const { originId, destinationId } = req.body;
@@ -145,26 +163,34 @@ router.post('/calculate-distance', async (req, res) => {
         
         const distanceSteps = distanceMiles * 2112; // 1 mile = 2112 steps (30-inch intervals)
         
-        // Calculate estimated driving time (rough estimate: 30 mph average)
-        const drivingTimeHours = distanceMiles / 30;
-        const drivingTimeMinutes = Math.round(drivingTimeHours * 60);
+        // Calculate estimated walking time (average 3 mph)
+        const walkingTimeHours = distanceMiles / 3;
+        const walkingTimeMinutes = Math.round(walkingTimeHours * 60);
         
         res.json({
             origin: {
                 id: origin._id,
                 name: origin.name,
-                coordinates: origin.coordinates
+                coordinates: origin.coordinates,
+                macrolocation: origin.macrolocation
             },
             destination: {
                 id: destination._id,
                 name: destination.name,
-                coordinates: destination.coordinates
+                coordinates: destination.coordinates,
+                macrolocation: destination.macrolocation
             },
             distance: {
                 miles: distanceMiles.toFixed(2),
                 kilometers: (distanceMiles * 1.60934).toFixed(2),
                 steps: Math.round(distanceSteps),
-                stepsFormatted: Math.round(distanceSteps).toLocaleString()
+                stepsFormatted: Math.round(distanceSteps).toLocaleString(),
+                duration: {
+                    text: walkingTimeMinutes < 60 
+                        ? `${walkingTimeMinutes} minutes` 
+                        : `${Math.floor(walkingTimeMinutes / 60)} hour ${walkingTimeMinutes % 60} minutes`,
+                    minutes: walkingTimeMinutes
+                }
             }
         });
         

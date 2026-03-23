@@ -16,7 +16,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                 {/* Left Section - Logo/Title */}
                 <div style={styles.leftSection}>
                     <div style={styles.logo}>
-                        🍎 Nutrition App
+                        San Jose Hills Fitness
                     </div>
                 </div>
                 
@@ -41,7 +41,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            📚 Food Catalog
+                            Food Catalog
                         </button>
                         <button
                             onClick={() => onPageChange('add')}
@@ -61,7 +61,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            ➕ Add Food Item
+                            Add Food Item
                         </button>
                         <button
                             onClick={() => onPageChange('distance')}
@@ -81,7 +81,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            📏 Distance Calculator
+                            Distance Calculator
                         </button>
                     </div>
                     

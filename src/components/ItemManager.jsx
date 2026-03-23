@@ -240,7 +240,7 @@ class ItemManager extends Component {
                     
                     {!isLoggedIn && (
                         <p style={styles.loginPrompt}>
-                            💡 Tip: Click "Login / Register" in the navigation bar to start adding items
+                            Click "Login / Register" in the navigation bar to start adding items
                         </p>
                     )}
                 </form>

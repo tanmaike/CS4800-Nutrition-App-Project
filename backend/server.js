@@ -8,18 +8,19 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 require('dotenv').config();
 
-// Connect to MongoDB
+// Connect to MongoDB Atlas
 connectDB();
 
 const app = express();
 
-// Session configuration - fixed for connect-mongo v4+
+// Session configuration with connect-mongo v5
 app.use(session({
-    secret: 'your-secret-key-change-this-in-production',
+    secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: 'mongodb://127.0.0.1:27017/nutrition_app',
+        mongoUrl: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/nutrition_app',
+        collectionName: 'sessions',
         ttl: 24 * 60 * 60 // 1 day in seconds
     }),
     cookie: {
@@ -29,21 +30,22 @@ app.use(session({
     }
 }));
 
-// CORS configuration for sessions
+// CORS configuration
 app.use(cors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-    credentials: true, // Important for sessions
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
-// Test route
+// Test route to verify connection
 app.get('/api/test', (req, res) => {
     res.json({ 
         message: 'Backend is working!', 
         timestamp: new Date(),
+        database: 'MongoDB Atlas',
         session: req.session.user ? { username: req.session.user.username } : null
     });
 });

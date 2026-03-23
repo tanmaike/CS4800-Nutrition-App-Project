@@ -10,6 +10,12 @@ const locationSchema = new mongoose.Schema({
         lat: { type: Number, required: true },
         lng: { type: Number, required: true }
     },
+    macrolocation: {
+        type: String,
+        enum: ['CPP', 'Mt. SAC', 'Other'],
+        required: true,
+        default: 'Other'
+    },
     createdBy: {
         type: Number,
         ref: 'User'
@@ -26,6 +32,6 @@ const locationSchema = new mongoose.Schema({
 });
 
 // Add text index for search
-locationSchema.index({ name: 'text' });
+locationSchema.index({ name: 'text', macrolocation: 'text' });
 
 module.exports = mongoose.model('Location', locationSchema);
