@@ -199,7 +199,7 @@ class DistanceCalculator extends Component {
                             ...(filterMacrolocation === 'CPP' && styles.activeFilterButtonCPP)
                         }}
                     >
-                        🟢 CPP
+                        CPP
                     </button>
                     <button
                         onClick={() => this.setState({ filterMacrolocation: 'Mt. SAC' })}
@@ -208,7 +208,7 @@ class DistanceCalculator extends Component {
                             ...(filterMacrolocation === 'Mt. SAC' && styles.activeFilterButtonMtSAC)
                         }}
                     >
-                        🔴 Mt. SAC
+                        Mt. SAC
                     </button>
                     <button
                         onClick={() => this.setState({ filterMacrolocation: 'Other' })}
@@ -217,7 +217,7 @@ class DistanceCalculator extends Component {
                             ...(filterMacrolocation === 'Other' && styles.activeFilterButtonOther)
                         }}
                     >
-                        🟡 Other
+                        Other
                     </button>
                 </div>
                 
@@ -431,7 +431,7 @@ class DistanceCalculator extends Component {
                         
                         <div style={styles.distanceGrid}>
                             <div style={styles.distanceCard}>
-                                <span style={styles.distanceIcon}>🚶</span>
+                                <span style={styles.distanceIcon}></span>
                                 <div>
                                     <div style={styles.distanceValue}>{result.distance.miles} miles</div>
                                     <div style={styles.distanceLabel}>Straight-line Distance</div>
@@ -439,7 +439,7 @@ class DistanceCalculator extends Component {
                             </div>
                             
                             <div style={styles.distanceCard}>
-                                <span style={styles.distanceIcon}>👣</span>
+                                <span style={styles.distanceIcon}></span>
                                 <div>
                                     <div style={styles.distanceValue}>{result.distance.stepsFormatted} steps</div>
                                     <div style={styles.distanceLabel}>Walking Steps (30" intervals)</div>
@@ -447,7 +447,7 @@ class DistanceCalculator extends Component {
                             </div>
                             
                             <div style={styles.distanceCard}>
-                                <span style={styles.distanceIcon}>⏱️</span>
+                                <span style={styles.distanceIcon}></span>
                                 <div>
                                     <div style={styles.distanceValue}>{result.distance.duration.text}</div>
                                     <div style={styles.distanceLabel}>Estimated Walking Time</div>
@@ -477,9 +477,9 @@ class DistanceCalculator extends Component {
                                         ...styles.macrolocationHeader,
                                         borderLeftColor: this.getMacrolocationColor(macrolocation)
                                     }}>
-                                        {macrolocation === 'CPP' && '🟢 '}
-                                        {macrolocation === 'Mt. SAC' && '🔴 '}
-                                        {macrolocation === 'Other' && '🟡 '}
+                                        {macrolocation === 'CPP'}
+                                        {macrolocation === 'Mt. SAC'}
+                                        {macrolocation === 'Other'}
                                         {macrolocation} ({locs.length})
                                     </h4>
                                     <div style={styles.locationGrid}>
