@@ -13,7 +13,6 @@ const requireAuth = (req, res, next) => {
 // CREATE - requires authentication
 router.post('/items', requireAuth, async (req, res) => {
     try {
-        // Add user info to the item
         const newItem = new Item({
             ...req.body,
             createdBy: req.session.user.userId,
@@ -22,6 +21,7 @@ router.post('/items', requireAuth, async (req, res) => {
         const savedItem = await newItem.save();
         res.status(201).json(savedItem);
     } catch (error) {
+        console.error('Error creating item:', error);
         res.status(400).json({ message: error.message });
     }
 });
@@ -29,9 +29,10 @@ router.post('/items', requireAuth, async (req, res) => {
 // READ ALL - public
 router.get('/items', async (req, res) => {
     try {
-        const items = await Item.find();
+        const items = await Item.find().sort({ createdAt: -1 });
         res.json(items);
     } catch (error) {
+        console.error('Error fetching items:', error);
         res.status(500).json({ message: error.message });
     }
 });
@@ -45,6 +46,7 @@ router.get('/items/:id', async (req, res) => {
         }
         res.json(item);
     } catch (error) {
+        console.error('Error fetching item:', error);
         res.status(500).json({ message: error.message });
     }
 });
@@ -52,16 +54,19 @@ router.get('/items/:id', async (req, res) => {
 // UPDATE - requires authentication
 router.put('/items/:id', requireAuth, async (req, res) => {
     try {
+        const item = await Item.findById(req.params.id);
+        if (!item) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+        
         const updatedItem = await Item.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true, runValidators: true }
         );
-        if (!updatedItem) {
-            return res.status(404).json({ message: 'Item not found' });
-        }
         res.json(updatedItem);
     } catch (error) {
+        console.error('Error updating item:', error);
         res.status(400).json({ message: error.message });
     }
 });
@@ -69,12 +74,15 @@ router.put('/items/:id', requireAuth, async (req, res) => {
 // DELETE - requires authentication
 router.delete('/items/:id', requireAuth, async (req, res) => {
     try {
-        const deletedItem = await Item.findByIdAndDelete(req.params.id);
-        if (!deletedItem) {
+        const item = await Item.findById(req.params.id);
+        if (!item) {
             return res.status(404).json({ message: 'Item not found' });
         }
+        
+        await item.deleteOne();
         res.json({ message: 'Item deleted successfully' });
     } catch (error) {
+        console.error('Error deleting item:', error);
         res.status(500).json({ message: error.message });
     }
 });

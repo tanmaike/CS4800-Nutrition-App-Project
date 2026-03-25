@@ -5,7 +5,6 @@ const userRoutes = require('./routes/userRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const cors = require('cors');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
 require('dotenv').config();
 
 // Connect to MongoDB Atlas
@@ -13,40 +12,62 @@ connectDB();
 
 const app = express();
 
-// Session configuration with connect-mongo v5
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/nutrition_app',
-        collectionName: 'sessions',
-        ttl: 24 * 60 * 60 // 1 day in seconds
-    }),
-    cookie: {
-        secure: false, // Set to true if using HTTPS
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 // 24 hours
-    }
-}));
+// CORS configuration - allow your production IP
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5001',
+    'http://127.0.0.1:5173',
+    // Add your production IP(s) here
+    'http://YOUR_EC2_PUBLIC_IP',
+    // You can also use a wildcard for development
+    // '*'
+];
 
-// CORS configuration
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
-// Test route to verify connection
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: true,
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 // 24 hours
+    }
+}));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'healthy', 
+        timestamp: new Date(),
+        uptime: process.uptime()
+    });
+});
+
+// Test route
 app.get('/api/test', (req, res) => {
     res.json({ 
         message: 'Backend is working!', 
         timestamp: new Date(),
         database: 'MongoDB Atlas',
-        session: req.session.user ? { username: req.session.user.username } : null
+        environment: process.env.NODE_ENV || 'development'
     });
 });
 
@@ -58,4 +79,5 @@ app.use('/api', locationRoutes);
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
