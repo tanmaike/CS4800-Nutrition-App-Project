@@ -1,0 +1,30 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/nutrition-app
+            git pull origin main
+            cd backend && npm install --production
+            cd .. && npm install --production
+            npm run build
+            sudo chown -R www-data:www-data dist
+            sudo chmod -R 755 dist
+            pm2 restart nutrition-api
+            sudo systemctl reload nginx

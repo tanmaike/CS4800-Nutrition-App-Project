@@ -24,4 +24,21 @@ dist-ssr
 *.sw?
 
 # Environment
+.env# Environment files
 .env
+.env.local
+.env.production
+
+# Node modules
+node_modules/
+backend/node_modules/
+
+# Build output
+dist/
+build/
+
+# PM2 logs
+.pm2/
+
+# OS files
+.DS_Store
