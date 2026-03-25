@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import API_URL from '../config';
 
-const API_URL = '/api';
 
 class AuthModal extends Component {
     constructor(props) {

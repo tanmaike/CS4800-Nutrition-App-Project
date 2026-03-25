@@ -4,6 +4,7 @@ import Navigation from './components/Navigation';
 import FoodCatalog from './components/FoodCatalog';
 import ItemManager from './components/ItemManager';
 import DistanceCalculator from './components/DistanceCalculator';
+import API_URL from './config';
 
 axios.defaults.withCredentials = true;
 
@@ -23,7 +24,7 @@ class App extends Component {
 
     checkAuthStatus = async () => {
         try {
-            const response = await axios.get('http://localhost:5001/api/users/me');
+            const response = await axios.get(`${API_URL}/users/me`);
             if (response.data.isAuthenticated) {
                 this.setState({ user: response.data.user, loading: false });
             } else {
@@ -45,9 +46,8 @@ class App extends Component {
 
     handleLogout = async () => {
         try {
-            await axios.post('http://localhost:5001/api/users/logout');
+            await axios.post(`${API_URL}/users/logout`);
             this.setState({ user: null });
-            // Optional: Show a success message
             console.log('Logged out successfully');
         } catch (error) {
             console.error('Logout error:', error);
@@ -57,7 +57,6 @@ class App extends Component {
     handleItemAdded = () => {
         // Refresh catalog when new item is added
         if (this.state.currentPage === 'catalog') {
-            // Force refresh of catalog by changing page and back
             this.setState({ currentPage: 'add' }, () => {
                 setTimeout(() => {
                     this.setState({ currentPage: 'catalog' });
@@ -86,6 +85,7 @@ class App extends Component {
                     onLoginSuccess={this.handleLoginSuccess}
                     onLogout={this.handleLogout}
                 />
+                
                 {currentPage === 'catalog' ? (
                     <FoodCatalog key={currentPage} />
                 ) : currentPage === 'add' ? (

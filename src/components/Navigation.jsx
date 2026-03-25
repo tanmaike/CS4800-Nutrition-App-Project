@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AuthModal from './AuthModal';
+import API_URL from '../config';
 
 const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout }) => {
     const [showAuthModal, setShowAuthModal] = useState(false);
