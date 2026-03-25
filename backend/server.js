@@ -18,7 +18,7 @@ const allowedOrigins = [
     'http://localhost:5001',
     'http://127.0.0.1:5173',
     // Add your production IP(s) here
-    'http://YOUR_EC2_PUBLIC_IP',
+    'http://54.183.194.8',
     // You can also use a wildcard for development
     // '*'
 ];
