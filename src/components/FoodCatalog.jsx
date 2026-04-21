@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import API_URL from '../config';
 
-
 class FoodCatalog extends Component {
     constructor(props) {
         super(props);
@@ -10,11 +9,24 @@ class FoodCatalog extends Component {
             items: [],
             filteredItems: [],
             searchTerm: '',
-            searchCategory: 'name', // 'name', 'addedBy', 'date'
+            searchCategory: 'name',
             loading: false,
             error: null,
-            sortBy: 'newest', // 'newest', 'oldest', 'caloriesHigh', 'caloriesLow'
-            selectedItem: null // For modal view
+            sortBy: 'newest',
+            selectedItem: null,
+            showAddForm: false,
+            newItem: {
+                name: '',
+                calories: '',
+                quantity: '',
+                fcpAmount: {
+                    fat: '',
+                    carbs: '',
+                    protein: '',
+                    unit: 'g'
+                }
+            },
+            addingItem: false
         };
     }
 
@@ -25,7 +37,9 @@ class FoodCatalog extends Component {
     fetchItems = async () => {
         this.setState({ loading: true, error: null });
         try {
-            const response = await axios.get(`${API_URL}/items`);
+            const response = await axios.get(`${API_URL}/items`, {
+                withCredentials: true
+            });
             const items = Array.isArray(response.data) ? response.data : [];
             this.setState({ items, loading: false });
             this.applyFilters();
@@ -59,7 +73,6 @@ class FoodCatalog extends Component {
     applyFilters = () => {
         const { items, searchTerm, searchCategory, sortBy } = this.state;
         
-        // First, filter items
         let filtered = [...items];
         
         if (searchTerm.trim()) {
@@ -80,7 +93,6 @@ class FoodCatalog extends Component {
             });
         }
         
-        // Then, sort items
         filtered.sort((a, b) => {
             switch(sortBy) {
                 case 'newest':
@@ -109,15 +121,234 @@ class FoodCatalog extends Component {
         this.setState({ selectedItem: null });
     };
 
+    handleInputChange = (e) => {
+        const { name, value } = e.target;
+        
+        if (name.startsWith('fcpAmount.')) {
+            const field = name.split('.')[1];
+            this.setState(prevState => ({
+                newItem: {
+                    ...prevState.newItem,
+                    fcpAmount: {
+                        ...prevState.newItem.fcpAmount,
+                        [field]: value
+                    }
+                }
+            }));
+        } else {
+            this.setState(prevState => ({
+                newItem: {
+                    ...prevState.newItem,
+                    [name]: value
+                }
+            }));
+        }
+    };
+
+    addFoodItem = async (e) => {
+        e.preventDefault();
+        
+        const { user } = this.props;
+        
+        if (!user) {
+            this.setState({ error: 'Please login to add food items' });
+            setTimeout(() => this.setState({ error: null }), 3000);
+            return;
+        }
+        
+        const { newItem } = this.state;
+        
+        // Validate inputs
+        if (!newItem.name || !newItem.calories || !newItem.quantity) {
+            this.setState({ error: 'Name, calories, and quantity are required' });
+            return;
+        }
+        
+        this.setState({ addingItem: true, error: null });
+        
+        try {
+            const response = await axios.post(`${API_URL}/items`, {
+                name: newItem.name,
+                calories: parseFloat(newItem.calories),
+                quantity: parseFloat(newItem.quantity),
+                fcpAmount: {
+                    fat: parseFloat(newItem.fcpAmount.fat) || 0,
+                    carbs: parseFloat(newItem.fcpAmount.carbs) || 0,
+                    protein: parseFloat(newItem.fcpAmount.protein) || 0,
+                    unit: 'g'
+                }
+            }, {
+                withCredentials: true
+            });
+            
+            // Refresh the items list
+            await this.fetchItems();
+            
+            // Reset form
+            this.setState({
+                showAddForm: false,
+                addingItem: false,
+                newItem: {
+                    name: '',
+                    calories: '',
+                    quantity: '',
+                    fcpAmount: {
+                        fat: '',
+                        carbs: '',
+                        protein: '',
+                        unit: 'g'
+                    }
+                },
+                success: 'Food item added successfully!'
+            });
+            
+            // Clear success message after 3 seconds
+            setTimeout(() => {
+                this.setState({ success: null });
+            }, 3000);
+            
+        } catch (error) {
+            this.setState({ 
+                error: error.response?.data?.message || 'Error adding food item',
+                addingItem: false 
+            });
+        }
+    };
+
     render() {
-        const { filteredItems, loading, error, searchTerm, searchCategory, sortBy, selectedItem } = this.state;
+        const { filteredItems, loading, error, searchTerm, searchCategory, sortBy, selectedItem, showAddForm, newItem, addingItem, success } = this.state;
+        const { user } = this.props;
+        const isLoggedIn = !!user;
         
         return (
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <h1>Food Catalog</h1>
-                    <p style={styles.subtitle}>Browse and search through our collection of food items</p>
+                    <h1>🍽️ Food Catalog</h1>
+                    <p style={styles.subtitle}>Browse, search, and add food items to our collection</p>
                 </div>
+                
+                {/* Add Food Button - Only show if logged in */}
+                {isLoggedIn && (
+                    <div style={styles.addButtonContainer}>
+                        <button 
+                            onClick={() => this.setState({ showAddForm: !showAddForm })}
+                            style={styles.addButton}
+                        >
+                            {showAddForm ? 'Cancel' : '+ Add New Food Item'}
+                        </button>
+                    </div>
+                )}
+                
+                {/* Add Food Form - Only show if logged in */}
+                {isLoggedIn && showAddForm && (
+                    <form onSubmit={this.addFoodItem} style={styles.form}>
+                        <h3 style={styles.formTitle}>Add New Food Item</h3>
+                        
+                        <div style={styles.formGroup}>
+                            <label>Food Name *</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={newItem.name}
+                                onChange={this.handleInputChange}
+                                required
+                                style={styles.input}
+                                placeholder="e.g., Apple, Chicken Breast, Quinoa"
+                            />
+                        </div>
+                        
+                        <div style={styles.formRow}>
+                            <div style={styles.formGroup}>
+                                <label>Calories (kcal) *</label>
+                                <input
+                                    type="number"
+                                    name="calories"
+                                    value={newItem.calories}
+                                    onChange={this.handleInputChange}
+                                    step="any"
+                                    required
+                                    style={styles.input}
+                                    placeholder="e.g., 95"
+                                />
+                            </div>
+                            
+                            <div style={styles.formGroup}>
+                                <label>Serving Size (g) *</label>
+                                <input
+                                    type="number"
+                                    name="quantity"
+                                    value={newItem.quantity}
+                                    onChange={this.handleInputChange}
+                                    step="any"
+                                    required
+                                    style={styles.input}
+                                    placeholder="e.g., 100"
+                                />
+                            </div>
+                        </div>
+                        
+                        <h4 style={styles.sectionTitle}>Macronutrients (per 100g)</h4>
+                        
+                        <div style={styles.formRow}>
+                            <div style={styles.formGroup}>
+                                <label>Protein (g)</label>
+                                <input
+                                    type="number"
+                                    name="fcpAmount.protein"
+                                    value={newItem.fcpAmount.protein}
+                                    onChange={this.handleInputChange}
+                                    step="any"
+                                    style={styles.input}
+                                    placeholder="e.g., 10"
+                                />
+                            </div>
+                            
+                            <div style={styles.formGroup}>
+                                <label>Carbohydrates (g)</label>
+                                <input
+                                    type="number"
+                                    name="fcpAmount.carbs"
+                                    value={newItem.fcpAmount.carbs}
+                                    onChange={this.handleInputChange}
+                                    step="any"
+                                    style={styles.input}
+                                    placeholder="e.g., 25"
+                                />
+                            </div>
+                            
+                            <div style={styles.formGroup}>
+                                <label>Fat (g)</label>
+                                <input
+                                    type="number"
+                                    name="fcpAmount.fat"
+                                    value={newItem.fcpAmount.fat}
+                                    onChange={this.handleInputChange}
+                                    step="any"
+                                    style={styles.input}
+                                    placeholder="e.g., 0.3"
+                                />
+                            </div>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            disabled={addingItem}
+                            style={styles.submitButton}
+                        >
+                            {addingItem ? 'Adding...' : 'Add Food Item'}
+                        </button>
+                    </form>
+                )}
+                
+                {/* Login Prompt for Adding Items */}
+                {!isLoggedIn && (
+                    <div style={styles.loginPrompt}>
+                        <p>🔒 <strong>Want to add food items?</strong> Please login to add items to the catalog.</p>
+                    </div>
+                )}
+                
+                {/* Success Message */}
+                {success && <div style={styles.success}>{success}</div>}
                 
                 {/* Search and Filter Controls */}
                 <div style={styles.controls}>
@@ -208,11 +439,11 @@ class FoodCatalog extends Component {
                                         <div style={styles.metadata}>
                                             {item.createdByUsername && (
                                                 <p style={styles.creator}>
-                                                    Added By: {item.createdByUsername}
+                                                    👤 {item.createdByUsername}
                                                 </p>
                                             )}
                                             <p style={styles.date}>
-                                                Date Added: {new Date(item.createdAt).toLocaleDateString()}
+                                                📅 {new Date(item.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
@@ -222,21 +453,19 @@ class FoodCatalog extends Component {
                     </div>
                 )}
                 
-                {/* Modal for Detailed View */}
+                {/* Modal for Detailed View - Same as before */}
                 {selectedItem && (
                     <div style={styles.modalOverlay} onClick={this.closeItemModal}>
                         <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
                             <button style={styles.closeBtn} onClick={this.closeItemModal}>×</button>
                             
-                            {/* Green Header Bar with Food Name */}
                             <div style={styles.modalHeader}>
                                 <h2 style={styles.modalTitle}>{selectedItem.name}</h2>
                             </div>
                             
                             <div style={styles.modalContent}>
-                                {/* Basic Information Section */}
                                 <div style={styles.modalSection}>
-                                    <h3 style={styles.sectionTitle}>Basic Information</h3>
+                                    <h3 style={styles.sectionTitle}>📊 Basic Information</h3>
                                     <div style={styles.infoGrid}>
                                         <div style={styles.infoCard}>
                                             <span style={styles.infoLabel}>Calories</span>
@@ -249,16 +478,11 @@ class FoodCatalog extends Component {
                                     </div>
                                 </div>
                                 
-                                {/* Macronutrients Section with Yellow Accents */}
                                 <div style={styles.modalSection}>
-                                    <h3 style={styles.sectionTitle}>Macronutrients (per 100g)</h3>
+                                    <h3 style={styles.sectionTitle}>🥗 Macronutrients (per 100g)</h3>
                                     <div style={styles.macroDetails}>
-                                        {/* Protein Bar */}
                                         <div style={styles.macroBar}>
-                                            <div style={styles.macroLabel}>
-                                                <span style={styles.macroIcon}></span>
-                                                Protein
-                                            </div>
+                                            <div style={styles.macroLabel}>💪 Protein</div>
                                             <div style={styles.macroBarBg}>
                                                 <div style={{
                                                     ...styles.macroBarFill,
@@ -268,13 +492,8 @@ class FoodCatalog extends Component {
                                             </div>
                                             <div style={styles.macroValue}>{selectedItem.fcpAmount?.protein || 0}g</div>
                                         </div>
-                                        
-                                        {/* Carbs Bar */}
                                         <div style={styles.macroBar}>
-                                            <div style={styles.macroLabel}>
-                                                <span style={styles.macroIcon}></span>
-                                                Carbohydrates
-                                            </div>
+                                            <div style={styles.macroLabel}>🌾 Carbohydrates</div>
                                             <div style={styles.macroBarBg}>
                                                 <div style={{
                                                     ...styles.macroBarFill,
@@ -284,13 +503,8 @@ class FoodCatalog extends Component {
                                             </div>
                                             <div style={styles.macroValue}>{selectedItem.fcpAmount?.carbs || 0}g</div>
                                         </div>
-                                        
-                                        {/* Fat Bar */}
                                         <div style={styles.macroBar}>
-                                            <div style={styles.macroLabel}>
-                                                <span style={styles.macroIcon}></span>
-                                                Fat
-                                            </div>
+                                            <div style={styles.macroLabel}>🥑 Fat</div>
                                             <div style={styles.macroBarBg}>
                                                 <div style={{
                                                     ...styles.macroBarFill,
@@ -301,40 +515,10 @@ class FoodCatalog extends Component {
                                             <div style={styles.macroValue}>{selectedItem.fcpAmount?.fat || 0}g</div>
                                         </div>
                                     </div>
-                                    
-                                    {/* Total Calories Breakdown */}
-                                    <div style={styles.caloriesBreakdown}>
-                                        <div style={styles.breakdownTitle}>Calorie Distribution</div>
-                                        <div style={styles.breakdownBar}>
-                                            <div style={{
-                                                ...styles.breakdownFill,
-                                                width: `${((selectedItem.fcpAmount?.protein || 0) * 4) / selectedItem.calories * 100}%`,
-                                                backgroundColor: '#ffc036'
-                                            }}></div>
-                                            <div style={{
-                                                ...styles.breakdownFill,
-                                                width: `${((selectedItem.fcpAmount?.carbs || 0) * 4) / selectedItem.calories * 100}%`,
-                                                backgroundColor: '#ffc036',
-                                                opacity: 0.8
-                                            }}></div>
-                                            <div style={{
-                                                ...styles.breakdownFill,
-                                                width: `${((selectedItem.fcpAmount?.fat || 0) * 9) / selectedItem.calories * 100}%`,
-                                                backgroundColor: '#ffc036',
-                                                opacity: 0.6
-                                            }}></div>
-                                        </div>
-                                        <div style={styles.breakdownLegend}>
-                                            <span>Protein ({Math.round(((selectedItem.fcpAmount?.protein || 0) * 4) / selectedItem.calories * 100)}%)</span>
-                                            <span>Carbs ({Math.round(((selectedItem.fcpAmount?.carbs || 0) * 4) / selectedItem.calories * 100)}%)</span>
-                                            <span>Fat ({Math.round(((selectedItem.fcpAmount?.fat || 0) * 9) / selectedItem.calories * 100)}%)</span>
-                                        </div>
-                                    </div>
                                 </div>
                                 
-                                {/* Additional Information Section */}
                                 <div style={styles.modalSection}>
-                                    <h3 style={styles.sectionTitle}>Additional Information</h3>
+                                    <h3 style={styles.sectionTitle}>ℹ️ Additional Information</h3>
                                     <div style={styles.infoGrid}>
                                         <div style={styles.infoRow}>
                                             <span style={styles.infoLabel}>Added by:</span>
@@ -344,12 +528,6 @@ class FoodCatalog extends Component {
                                             <span style={styles.infoLabel}>Added on:</span>
                                             <span style={styles.infoText}>{new Date(selectedItem.createdAt).toLocaleString()}</span>
                                         </div>
-                                        {selectedItem.updatedAt && selectedItem.updatedAt !== selectedItem.createdAt && (
-                                            <div style={styles.infoRow}>
-                                                <span style={styles.infoLabel}>Last updated:</span>
-                                                <span style={styles.infoText}>{new Date(selectedItem.updatedAt).toLocaleString()}</span>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -361,16 +539,13 @@ class FoodCatalog extends Component {
     }
 }
 
-// Replace the styles object in FoodCatalog.jsx with:
-
+// Styles - Add new styles while keeping existing ones
 const styles = {
     container: {
         maxWidth: '1200px',
         margin: '0 auto',
         padding: '20px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif',
-        backgroundColor: 'white',
-        color: '#0c0c0c'
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     },
     header: {
         textAlign: 'center',
@@ -380,6 +555,88 @@ const styles = {
         color: '#666',
         fontSize: '14px',
         marginTop: '8px'
+    },
+    addButtonContainer: {
+        textAlign: 'right',
+        marginBottom: '20px'
+    },
+    addButton: {
+        padding: '10px 20px',
+        backgroundColor: '#008550',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        transition: 'background-color 0.3s ease'
+    },
+    form: {
+        backgroundColor: '#f9f9f9',
+        padding: '20px',
+        borderRadius: '8px',
+        marginBottom: '30px'
+    },
+    formTitle: {
+        marginTop: 0,
+        marginBottom: '20px',
+        color: '#0c0c0c'
+    },
+    formRow: {
+        display: 'flex',
+        gap: '20px',
+        marginBottom: '20px'
+    },
+    formGroup: {
+        flex: 1,
+        marginBottom: '15px'
+    },
+    input: {
+        width: '100%',
+        padding: '10px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        fontSize: '14px',
+        marginTop: '5px'
+    },
+    select: {
+        width: '100%',
+        padding: '10px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        fontSize: '14px',
+        marginTop: '5px',
+        backgroundColor: 'white'
+    },
+    submitButton: {
+        padding: '10px 20px',
+        backgroundColor: '#008550',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        width: '100%'
+    },
+    loginPrompt: {
+        backgroundColor: '#fff9e6',
+        padding: '15px',
+        borderRadius: '8px',
+        marginBottom: '20px',
+        textAlign: 'center',
+        borderLeft: `4px solid #ffc036`
+    },
+    sectionTitle: {
+        marginTop: '20px',
+        marginBottom: '15px',
+        color: '#0c0c0c'
+    },
+    success: {
+        backgroundColor: '#e8f5e9',
+        color: '#2e7d32',
+        padding: '10px',
+        borderRadius: '4px',
+        marginBottom: '20px',
+        textAlign: 'center'
     },
     controls: {
         display: 'flex',
@@ -398,8 +655,7 @@ const styles = {
         padding: '10px',
         border: '1px solid #ddd',
         borderRadius: '4px',
-        fontSize: '16px',
-        fontFamily: 'inherit'
+        fontSize: '16px'
     },
     sortBox: {
         display: 'flex',
@@ -408,15 +664,6 @@ const styles = {
     },
     sortLabel: {
         color: '#666'
-    },
-    select: {
-        padding: '10px',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        fontSize: '14px',
-        backgroundColor: 'white',
-        fontFamily: 'inherit',
-        cursor: 'pointer'
     },
     stats: {
         textAlign: 'center',
@@ -503,127 +750,39 @@ const styles = {
     modal: {
         backgroundColor: 'white',
         borderRadius: '12px',
-        padding: '30px',
         maxWidth: '600px',
         width: '90%',
         maxHeight: '80vh',
         overflowY: 'auto',
         position: 'relative'
     },
-    closeBtn: {
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        background: 'none',
-        border: 'none',
-        fontSize: '28px',
-        cursor: 'pointer',
-        color: '#999',
-        ':hover': {
-            color: '#0c0c0c'
-        }
-    },
-    modalTitle: {
-        marginTop: 0,
-        color: '#0c0c0c',
-        fontSize: '28px'
-    },
-    modalContent: {
-        marginTop: '20px'
-    },
-    modalSection: {
-        marginBottom: '25px'
-    },
-    macroDetails: {
-        marginTop: '10px'
-    },
-    macroBar: {
-        marginBottom: '15px'
-    },
-    macroLabel: {
-        marginBottom: '5px',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        color: '#0c0c0c'
-    },
-    macroBarBg: {
-        backgroundColor: '#f0f0f0',
-        height: '24px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        marginBottom: '5px'
-    },
-    macroBarFill: {
-        height: '100%',
-        transition: 'width 0.3s ease'
-    },
-    macroValue: {
-        fontSize: '12px',
-        color: '#666',
-        textAlign: 'right'
-    },
-    error: {
-        backgroundColor: '#ffebee',
-        color: '#c62828',
-        padding: '10px',
-        borderRadius: '4px',
-        marginBottom: '20px'
-    },
-    loading: {
-        backgroundColor: '#e3f2fd',
-        color: '#1565c0',
-        padding: '10px',
-        borderRadius: '4px',
-        textAlign: 'center'
-    },
-    emptyState: {
-        textAlign: 'center',
-        padding: '40px',
-        color: '#999'
-    },
-
-    // Add to the styles object in FoodCatalog.jsx
-
     modalHeader: {
         backgroundColor: '#008550',
         padding: '20px',
-        margin: '-30px -30px 20px -30px', // Negative margin to extend to modal edges
-        borderRadius: '12px 12px 0 0',
-        textAlign: 'center'
+        borderRadius: '12px 12px 0 0'
     },
     modalTitle: {
         margin: 0,
         color: 'white',
-        fontSize: '28px',
-        fontWeight: 'bold'
+        fontSize: '24px'
     },
     modalContent: {
-        marginTop: '20px'
+        padding: '20px'
     },
     modalSection: {
-        marginBottom: '30px',
-        padding: '0 10px'
-    },
-    sectionTitle: {
-        color: '#0c0c0c',
-        fontSize: '18px',
-        fontWeight: 'bold',
-        marginBottom: '15px',
-        borderLeft: `4px solid #ffc036`,
-        paddingLeft: '12px'
+        marginBottom: '20px'
     },
     infoGrid: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '15px'
+        gap: '10px'
     },
     infoCard: {
         backgroundColor: '#f5f5f5',
-        padding: '12px',
+        padding: '10px',
         borderRadius: '8px',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '5px'
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
     infoRow: {
         backgroundColor: '#f9f9f9',
@@ -650,26 +809,19 @@ const styles = {
         marginTop: '10px'
     },
     macroBar: {
-        marginBottom: '20px'
+        marginBottom: '15px'
     },
     macroLabel: {
-        marginBottom: '8px',
+        marginBottom: '5px',
         fontWeight: 'bold',
         fontSize: '14px',
-        color: '#0c0c0c',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
-    },
-    macroIcon: {
-        fontSize: '16px'
+        color: '#0c0c0c'
     },
     macroBarBg: {
         backgroundColor: '#f0f0f0',
         height: '30px',
         borderRadius: '15px',
-        overflow: 'hidden',
-        marginBottom: '5px'
+        overflow: 'hidden'
     },
     macroBarFill: {
         height: '100%',
@@ -677,48 +829,40 @@ const styles = {
         borderRadius: '15px'
     },
     macroValue: {
-        fontSize: '13px',
+        fontSize: '12px',
         color: '#666',
         textAlign: 'right',
-        fontWeight: 'bold'
+        marginTop: '5px'
     },
-    caloriesBreakdown: {
-        marginTop: '25px',
-        padding: '15px',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '8px'
+    closeBtn: {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        background: 'none',
+        border: 'none',
+        fontSize: '24px',
+        cursor: 'pointer',
+        color: 'white',
+        zIndex: 1
     },
-    breakdownTitle: {
-        fontSize: '13px',
-        fontWeight: 'bold',
-        color: '#666',
-        marginBottom: '10px'
+    error: {
+        backgroundColor: '#ffebee',
+        color: '#c62828',
+        padding: '10px',
+        borderRadius: '4px',
+        marginBottom: '20px'
     },
-    breakdownBar: {
-        display: 'flex',
-        height: '24px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        marginBottom: '10px'
+    loading: {
+        backgroundColor: '#e3f2fd',
+        color: '#1565c0',
+        padding: '10px',
+        borderRadius: '4px',
+        textAlign: 'center'
     },
-    breakdownFill: {
-        height: '100%',
-        transition: 'width 0.3s ease'
-    },
-    breakdownLegend: {
-        display: 'flex',
-        gap: '15px',
-        fontSize: '11px',
-        color: '#666',
-        flexWrap: 'wrap'
-    },
-    legendColor: {
-        display: 'inline-block',
-        width: '12px',
-        height: '12px',
-        borderRadius: '2px',
-        marginRight: '5px',
-        backgroundColor: '#ffc036'
+    emptyState: {
+        textAlign: 'center',
+        padding: '40px',
+        color: '#999'
     }
 };
 

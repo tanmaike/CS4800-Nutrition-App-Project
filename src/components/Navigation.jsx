@@ -42,27 +42,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            Food Catalog
-                        </button>
-                        <button
-                            onClick={() => onPageChange('add')}
-                            style={{
-                                ...styles.navButton,
-                                ...(currentPage === 'add' && styles.activeNavButton),
-                                ...(currentPage !== 'add' && styles.inactiveNavButton)
-                            }}
-                            onMouseEnter={(e) => {
-                                if (currentPage !== 'add') {
-                                    e.target.style.backgroundColor = '#006340';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (currentPage !== 'add') {
-                                    e.target.style.backgroundColor = '#008550';
-                                }
-                            }}
-                        >
-                            Add Food Item
+                            📚 Food Catalog
                         </button>
                         <button
                             onClick={() => onPageChange('distance')}
@@ -82,7 +62,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            Distance Calculator
+                            📏 Distance Calculator
                         </button>
                     </div>
                     

@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import Navigation from './components/Navigation';
 import FoodCatalog from './components/FoodCatalog';
-import ItemManager from './components/ItemManager';
 import DistanceCalculator from './components/DistanceCalculator';
+import Footer from './components/Footer';
 import API_URL from './config';
 
 axios.defaults.withCredentials = true;
@@ -24,7 +24,7 @@ class App extends Component {
 
     checkAuthStatus = async () => {
         try {
-            const response = await axios.get(`${API_URL}/users/me`);
+            const response = await axios.get('/api/users/me');
             if (response.data.isAuthenticated) {
                 this.setState({ user: response.data.user, loading: false });
             } else {
@@ -46,22 +46,11 @@ class App extends Component {
 
     handleLogout = async () => {
         try {
-            await axios.post(`${API_URL}/users/logout`);
+            await axios.post('/api/users/logout');
             this.setState({ user: null });
             console.log('Logged out successfully');
         } catch (error) {
             console.error('Logout error:', error);
-        }
-    };
-
-    handleItemAdded = () => {
-        // Refresh catalog when new item is added
-        if (this.state.currentPage === 'catalog') {
-            this.setState({ currentPage: 'add' }, () => {
-                setTimeout(() => {
-                    this.setState({ currentPage: 'catalog' });
-                }, 100);
-            });
         }
     };
 
@@ -77,7 +66,7 @@ class App extends Component {
         }
 
         return (
-            <div className="App">
+            <div className="App" style={styles.app}>
                 <Navigation 
                     currentPage={currentPage}
                     onPageChange={this.handlePageChange}
@@ -86,23 +75,32 @@ class App extends Component {
                     onLogout={this.handleLogout}
                 />
                 
-                {currentPage === 'catalog' ? (
-                    <FoodCatalog key={currentPage} />
-                ) : currentPage === 'add' ? (
-                    <ItemManager 
-                        user={user}
-                        onLoginSuccess={this.handleLoginSuccess}
-                        onItemAdded={this.handleItemAdded}
-                    />
-                ) : (
-                    <DistanceCalculator user={user} />
-                )}
+                <div style={styles.mainContent}>
+                    {currentPage === 'catalog' ? (
+                        <FoodCatalog 
+                            user={user}
+                            onLoginSuccess={this.handleLoginSuccess}
+                        />
+                    ) : (
+                        <DistanceCalculator user={user} />
+                    )}
+                </div>
+                
+                <Footer />
             </div>
         );
     }
 }
 
 const styles = {
+    app: {
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    mainContent: {
+        flex: 1
+    },
     loadingContainer: {
         display: 'flex',
         justifyContent: 'center',
