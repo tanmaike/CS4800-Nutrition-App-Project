@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AuthModal from './AuthModal';
+import logo from '../assets/images/logo.png';
 import API_URL from '../config';
 
 const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout }) => {
@@ -17,7 +18,8 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                 {/* Left Section - Logo/Title */}
                 <div style={styles.leftSection}>
                     <div style={styles.logo}>
-                        San Jose Hills Fitness
+                        <img src={logo} alt="SJHF Logo" style={styles.logoImage} />
+                        <span>San Jose Hills Fitness</span>
                     </div>
                 </div>
                 
@@ -140,11 +142,21 @@ const styles = {
         alignItems: 'center'
     },
     logo: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
         fontSize: '20px',
         fontWeight: 'bold',
         cursor: 'pointer',
-        color: 'white',
-        whiteSpace: 'nowrap'
+        color: 'white'
+    },
+    logoIcon: {
+        fontSize: '24px'
+    },
+    logoImage: {
+        width: '30px',
+        height: '30px',
+        objectFit: 'contain'
     },
     navLinks: {
         display: 'flex',

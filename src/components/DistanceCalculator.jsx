@@ -468,7 +468,7 @@ class DistanceCalculator extends Component {
                 {/* Locations List - Grouped by Macrolocation */}
                 {locations.length > 0 && (
                     <div style={styles.locationsList}>
-                        <h3>Common Locations ({filteredLocations.length})</h3>
+                        <h3>Locations ({filteredLocations.length})</h3>
                         
                         {Object.entries(groupedLocations).map(([macrolocation, locs]) => (
                             locs.length > 0 && (
