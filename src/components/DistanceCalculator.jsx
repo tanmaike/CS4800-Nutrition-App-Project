@@ -326,7 +326,7 @@ class DistanceCalculator extends Component {
                 {/* Login Prompt for Adding Locations */}
                 {!isLoggedIn && (
                     <div style={styles.loginPrompt}>
-                        <p>🔒 <strong>Want to add locations?</strong> Please login to add and save locations for distance calculation.</p>
+                        <p><strong>Want to add locations?</strong> Please login to add and save locations for distance calculation.</p>
                     </div>
                 )}
                 

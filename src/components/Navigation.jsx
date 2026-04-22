@@ -42,7 +42,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            📚 Food Catalog
+                            Food Catalog
                         </button>
                         <button
                             onClick={() => onPageChange('distance')}
@@ -62,7 +62,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            📏 Distance Calculator
+                            Distance Calculator
                         </button>
                     </div>
                     

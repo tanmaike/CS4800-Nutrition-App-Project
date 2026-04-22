@@ -223,7 +223,7 @@ class FoodCatalog extends Component {
         return (
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <h1>🍽️ Food Catalog</h1>
+                    <h1>Food Catalog</h1>
                     <p style={styles.subtitle}>Browse, search, and add food items to our collection</p>
                 </div>
                 
@@ -343,7 +343,7 @@ class FoodCatalog extends Component {
                 {/* Login Prompt for Adding Items */}
                 {!isLoggedIn && (
                     <div style={styles.loginPrompt}>
-                        <p>🔒 <strong>Want to add food items?</strong> Please login to add items to the catalog.</p>
+                        <p><strong>Want to add food items?</strong> Please login to add items to the catalog.</p>
                     </div>
                 )}
                 
