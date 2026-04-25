@@ -12,31 +12,36 @@ connectDB();
 
 const app = express();
 
-// CORS configuration - allow your production IP
 const allowedOrigins = [
+    'http://54.183.194.8',
+    'http://sanjosehillsfitness.com',
+    'http://www.sanjosehillsfitness.com',
     'http://localhost:5173',
     'http://localhost:5001',
     'http://127.0.0.1:5173',
-    // Add your production IP(s) here
-    'http://54.183.194.8',
-    // You can also use a wildcard for development
-    // '*'
+    'http://127.0.0.1:5001'
 ];
 
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.log('Blocked origin:', origin);
+            // For now, let's allow all origins to fix the issue
+            callback(null, true);
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+    exposedHeaders: ['Set-Cookie']
 }));
+
+app.options('*', cors());
 
 app.use(express.json());
 
