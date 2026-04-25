@@ -36,8 +36,8 @@ router.post('/register', [
     body('password')
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters long')
-        .matches(/^(?=.*[A-Za-z])(?=.*\d)/)
-        .withMessage('Password must contain at least one letter and one number'),
+        //.matches(/^(?=.*[A-Za-z])(?=.*\d)/)
+        //.withMessage('Password must contain at least one letter and one number'),
     body('displayName')
         .trim()
         .isLength({ min: 1, max: 50 })
