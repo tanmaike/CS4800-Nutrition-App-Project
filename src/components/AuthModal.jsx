@@ -1,28 +1,25 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import API_URL from '../config';
-
+import axios from 'axios';
 
 class AuthModal extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isLogin: true,
-            username: '',
-            password: '',
-            displayName: '',
-            error: null,
-            loading: false
-        };
-    }
+    state = {
+        isLogin: true,
+        username: '',
+        password: '',
+        displayName: '',
+        error: null,
+        fieldErrors: {},  // Initialize as empty object
+        loading: false
+    };
 
     handleInputChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value, error: null });
+        this.setState({ [e.target.name]: e.target.value, error: null, fieldErrors: {} });
     };
 
     handleSubmit = async (e) => {
         e.preventDefault();
-        this.setState({ loading: true, error: null });
+        this.setState({ loading: true, error: null, fieldErrors: {} });
         
         const { isLogin, username, password, displayName } = this.state;
         
@@ -32,9 +29,10 @@ class AuthModal extends Component {
                     username,
                     password
                 }, {
-                    withCredentials: true // Important for sessions
+                    withCredentials: true
                 });
                 this.props.onLoginSuccess(response.data.user);
+                this.props.onClose();
             } else {
                 const response = await axios.post(`${API_URL}/users/register`, {
                     username,
@@ -43,14 +41,32 @@ class AuthModal extends Component {
                 }, {
                     withCredentials: true
                 });
-                this.props.onLoginSuccess(response.data.user);
+                
+                if (response.data.success) {
+                    this.props.onLoginSuccess(response.data.user);
+                    this.props.onClose();
+                }
             }
-            this.props.onClose();
         } catch (error) {
-            this.setState({
-                error: error.response?.data?.message || 'Authentication failed',
-                loading: false
-            });
+            console.error('Auth error:', error.response?.data);
+            
+            if (error.response?.data?.errors) {
+                this.setState({ 
+                    fieldErrors: error.response.data.errors,
+                    error: error.response.data.message,
+                    loading: false 
+                });
+            } else if (error.response?.data?.message) {
+                this.setState({ 
+                    error: error.response.data.message,
+                    loading: false 
+                });
+            } else {
+                this.setState({ 
+                    error: 'Authentication failed. Please check your connection.',
+                    loading: false 
+                });
+            }
         }
     };
 
@@ -58,6 +74,7 @@ class AuthModal extends Component {
         this.setState(prevState => ({
             isLogin: !prevState.isLogin,
             error: null,
+            fieldErrors: {},
             username: '',
             password: '',
             displayName: ''
@@ -65,7 +82,7 @@ class AuthModal extends Component {
     };
 
     render() {
-        const { isLogin, username, password, displayName, error, loading } = this.state;
+        const { isLogin, username, password, displayName, error, fieldErrors = {}, loading } = this.state;
         
         return (
             <div style={styles.overlay} onClick={this.props.onClose}>
@@ -85,8 +102,19 @@ class AuthModal extends Component {
                                 value={username}
                                 onChange={this.handleInputChange}
                                 required
-                                style={styles.input}
+                                style={{
+                                    ...styles.input,
+                                    ...(fieldErrors?.username && styles.inputError)
+                                }}
                             />
+                            {fieldErrors?.username && (
+                                <div style={styles.fieldError}>{fieldErrors.username}</div>
+                            )}
+                            {!isLogin && !fieldErrors?.username && (
+                                <div style={styles.hint}>
+                                    Username: 3-30 characters, letters/numbers/underscores only
+                                </div>
+                            )}
                         </div>
                         
                         <div style={styles.formGroup}>
@@ -97,9 +125,19 @@ class AuthModal extends Component {
                                 value={password}
                                 onChange={this.handleInputChange}
                                 required
-                                minLength="6"
-                                style={styles.input}
+                                style={{
+                                    ...styles.input,
+                                    ...(fieldErrors?.password && styles.inputError)
+                                }}
                             />
+                            {fieldErrors?.password && (
+                                <div style={styles.fieldError}>{fieldErrors.password}</div>
+                            )}
+                            {!isLogin && !fieldErrors?.password && (
+                                <div style={styles.hint}>
+                                    Password must be at least 6 characters with letters and numbers
+                                </div>
+                            )}
                         </div>
                         
                         {!isLogin && (
@@ -111,8 +149,14 @@ class AuthModal extends Component {
                                     value={displayName}
                                     onChange={this.handleInputChange}
                                     required
-                                    style={styles.input}
+                                    style={{
+                                        ...styles.input,
+                                        ...(fieldErrors?.displayName && styles.inputError)
+                                    }}
                                 />
+                                {fieldErrors?.displayName && (
+                                    <div style={styles.fieldError}>{fieldErrors.displayName}</div>
+                                )}
                             </div>
                         )}
                         
@@ -132,8 +176,6 @@ class AuthModal extends Component {
         );
     }
 }
-
-// Update the styles object in AuthModal.jsx:
 
 const styles = {
     overlay: {
@@ -180,22 +222,32 @@ const styles = {
         border: '1px solid #ddd',
         borderRadius: '4px',
         fontSize: '16px',
-        marginTop: '5px',
-        fontFamily: 'inherit'
+        marginTop: '5px'
+    },
+    inputError: {
+        borderColor: '#c62828',
+        backgroundColor: '#ffebee'
+    },
+    fieldError: {
+        color: '#c62828',
+        fontSize: '12px',
+        marginTop: '5px'
+    },
+    hint: {
+        color: '#666',
+        fontSize: '11px',
+        marginTop: '5px'
     },
     button: {
         width: '100%',
         padding: '10px',
-        backgroundColor: '#008550',
+        backgroundColor: '#4CAF50',
         color: 'white',
         border: 'none',
         borderRadius: '4px',
         fontSize: '16px',
         cursor: 'pointer',
-        marginTop: '10px',
-        transition: 'background-color 0.3s ease',
-        fontFamily: 'inherit',
-        fontWeight: '500'
+        marginTop: '10px'
     },
     error: {
         backgroundColor: '#ffebee',
@@ -211,10 +263,9 @@ const styles = {
     toggleBtn: {
         background: 'none',
         border: 'none',
-        color: '#008550',
+        color: '#4CAF50',
         cursor: 'pointer',
-        textDecoration: 'underline',
-        fontFamily: 'inherit'
+        textDecoration: 'underline'
     }
 };
 
