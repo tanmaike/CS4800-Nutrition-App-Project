@@ -1,25 +1,126 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AuthModal from './AuthModal';
 import logo from '../assets/images/logo.png';
-import API_URL from '../config';
 
 const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout }) => {
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    // Handle window resize
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+            if (window.innerWidth > 768) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleLogout = async () => {
         if (onLogout) {
             await onLogout();
         }
+        setIsMobileMenuOpen(false);
     };
 
+    const handlePageChangeWithClose = (page) => {
+        onPageChange(page);
+        setIsMobileMenuOpen(false);
+    };
+
+    // Mobile: Stacked layout with hamburger
+    if (isMobile) {
+        return (
+            <>
+                <nav style={styles.mobileNav}>
+                    <div style={styles.mobileNavRow}>
+                        <div style={styles.mobileLogo} onClick={() => handlePageChangeWithClose('catalog')}>
+                            <img src={logo} alt="SJHF Logo" style={styles.mobileLogoImage} />
+                            <span style={styles.mobileLogoText}>San Jose Hills Fitness</span>
+                        </div>
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            style={styles.hamburgerBtn}
+                            aria-label="Menu"
+                        >
+                            <span style={styles.hamburgerIcon}>{isMobileMenuOpen ? '✕' : '☰'}</span>
+                        </button>
+                    </div>
+                    
+                    {isMobileMenuOpen && (
+                        <div style={styles.mobileMenu}>
+                            <div style={styles.mobileNavLinks}>
+                                <button
+                                    onClick={() => handlePageChangeWithClose('catalog')}
+                                    style={{
+                                        ...styles.mobileNavButton,
+                                        ...(currentPage === 'catalog' && styles.mobileActiveNavButton)
+                                    }}
+                                >
+                                    📚 Food Catalog
+                                </button>
+                                <button
+                                    onClick={() => handlePageChangeWithClose('distance')}
+                                    style={{
+                                        ...styles.mobileNavButton,
+                                        ...(currentPage === 'distance' && styles.mobileActiveNavButton)
+                                    }}
+                                >
+                                    📏 Distance Calculator
+                                </button>
+                            </div>
+                            
+                            {user ? (
+                                <div style={styles.mobileUserInfo}>
+                                    <span style={styles.mobileUserName}>👤 {user.displayName}</span>
+                                    <button onClick={handleLogout} style={styles.mobileLogoutBtn}>
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <button 
+                                    onClick={() => {
+                                        setShowAuthModal(true);
+                                        setIsMobileMenuOpen(false);
+                                    }} 
+                                    style={styles.mobileLoginBtn}
+                                >
+                                    Login / Register
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </nav>
+                <div style={styles.mobileNavSpacer} />
+                
+                {showAuthModal && (
+                    <AuthModal
+                        onClose={() => setShowAuthModal(false)}
+                        onLoginSuccess={(user) => {
+                            setShowAuthModal(false);
+                            if (onLoginSuccess) {
+                                onLoginSuccess(user);
+                            }
+                        }}
+                    />
+                )}
+            </>
+        );
+    }
+
+    // Desktop: Horizontal three-column layout
     return (
         <>
-            <nav style={styles.nav}>
+            <nav style={styles.desktopNav}>
                 {/* Left Section - Logo/Title */}
                 <div style={styles.leftSection}>
-                    <div style={styles.logo}>
+                    <div style={styles.logo} onClick={() => handlePageChangeWithClose('catalog')}>
                         <img src={logo} alt="SJHF Logo" style={styles.logoImage} />
-                        <span>San Jose Hills Fitness</span>
+                        <span style={styles.logoText}>San Jose Hills Fitness</span>
                     </div>
                 </div>
                 
@@ -27,7 +128,7 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                 <div style={styles.centerSection}>
                     <div style={styles.navLinks}>
                         <button
-                            onClick={() => onPageChange('catalog')}
+                            onClick={() => handlePageChangeWithClose('catalog')}
                             style={{
                                 ...styles.navButton,
                                 ...(currentPage === 'catalog' && styles.activeNavButton),
@@ -44,10 +145,10 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            Food Catalog
+                            📚 Food Catalog
                         </button>
                         <button
-                            onClick={() => onPageChange('distance')}
+                            onClick={() => handlePageChangeWithClose('distance')}
                             style={{
                                 ...styles.navButton,
                                 ...(currentPage === 'distance' && styles.activeNavButton),
@@ -64,10 +165,9 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                                 }
                             }}
                         >
-                            Distance Calculator
+                            📏 Distance Calculator
                         </button>
                     </div>
-                    
                 </div>
                 
                 {/* Right Section - User Authentication */}
@@ -95,6 +195,8 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                 </div>
             </nav>
             
+            <div style={styles.desktopNavSpacer} />
+            
             {showAuthModal && (
                 <AuthModal
                     onClose={() => setShowAuthModal(false)}
@@ -111,32 +213,38 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
 };
 
 const styles = {
-    nav: {
-        display: 'flex',
-        justifyContent: 'space-between',
+    // Desktop styles (3-column horizontal layout)
+    desktopNav: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
         alignItems: 'center',
         backgroundColor: '#008550',
         padding: '15px 30px',
         color: 'white',
-        marginBottom: '30px',
         gap: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        minHeight: '70px',
-        flexWrap: 'wrap'
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        minHeight: '70px'
+    },
+    desktopNavSpacer: {
+        height: '70px',
+        width: '100%'
     },
     leftSection: {
-        flex: '0 0 auto',  // Don't grow or shrink
         display: 'flex',
+        justifyContent: 'flex-start',
         alignItems: 'center'
     },
     centerSection: {
-        flex: '1 1 auto',  // Can grow and shrink
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'
     },
     rightSection: {
-        flex: '0 0 auto',  // Don't grow or shrink
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center'
@@ -144,24 +252,23 @@ const styles = {
     logo: {
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
-        fontSize: '20px',
-        fontWeight: 'bold',
+        gap: '12px',
         cursor: 'pointer',
         color: 'white'
     },
-    logoIcon: {
-        fontSize: '24px'
-    },
     logoImage: {
-        width: '30px',
-        height: '30px',
+        height: '32px',
+        width: 'auto',
         objectFit: 'contain'
+    },
+    logoText: {
+        fontSize: 'clamp(14px, 2vw, 20px)',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap'
     },
     navLinks: {
         display: 'flex',
-        gap: '10px',
-        flexWrap: 'wrap',
+        gap: '15px',
         justifyContent: 'center'
     },
     navButton: {
@@ -202,7 +309,6 @@ const styles = {
         cursor: 'pointer',
         fontSize: '14px',
         fontWeight: '500',
-        transition: 'background-color 0.3s ease',
         whiteSpace: 'nowrap'
     },
     logoutBtn: {
@@ -213,28 +319,123 @@ const styles = {
         borderRadius: '4px',
         cursor: 'pointer',
         fontSize: '12px',
-        transition: 'background-color 0.3s ease',
         whiteSpace: 'nowrap'
     },
-    // Responsive design
-    '@media (max-width: 768px)': {
-        nav: {
-            flexDirection: 'column',
-            gap: '15px',
-            textAlign: 'center'
-        },
-        leftSection: {
-            justifyContent: 'center'
-        },
-        centerSection: {
-            width: '100%'
-        },
-        rightSection: {
-            justifyContent: 'center'
-        },
-        userInfo: {
-            justifyContent: 'center'
-        }
+
+    // Mobile styles (stacked vertical layout)
+    mobileNav: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backgroundColor: '#008550',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+    },
+    mobileNavRow: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '12px 20px',
+        minHeight: '60px'
+    },
+    mobileLogo: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        cursor: 'pointer',
+        flex: 1
+    },
+    mobileLogoImage: {
+        height: '28px',
+        width: 'auto',
+        objectFit: 'contain'
+    },
+    mobileLogoText: {
+        fontSize: '16px',
+        fontWeight: 'bold',
+        color: 'white'
+    },
+    hamburgerBtn: {
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    hamburgerIcon: {
+        fontSize: '24px',
+        color: 'white'
+    },
+    mobileMenu: {
+        padding: '15px 20px',
+        backgroundColor: '#008550',
+        borderTop: '1px solid rgba(255,255,255,0.2)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '15px'
+    },
+    mobileNavLinks: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px'
+    },
+    mobileNavButton: {
+        padding: '12px',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '16px',
+        border: 'none',
+        backgroundColor: 'transparent',
+        color: 'white',
+        textAlign: 'center',
+        width: '100%'
+    },
+    mobileActiveNavButton: {
+        backgroundColor: '#ffc036',
+        color: '#0c0c0c'
+    },
+    mobileUserInfo: {
+        borderTop: '1px solid rgba(255,255,255,0.2)',
+        paddingTop: '15px',
+        marginTop: '5px'
+    },
+    mobileUserName: {
+        display: 'block',
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: '16px',
+        marginBottom: '10px',
+        textAlign: 'center'
+    },
+    mobileLoginBtn: {
+        padding: '12px',
+        backgroundColor: '#ffc036',
+        color: '#0c0c0c',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '16px',
+        fontWeight: '500',
+        width: '100%',
+        textAlign: 'center'
+    },
+    mobileLogoutBtn: {
+        padding: '10px',
+        backgroundColor: '#e74c3c',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        width: '100%',
+        textAlign: 'center'
+    },
+    mobileNavSpacer: {
+        height: '120px', // Extra space for stacked mobile nav
+        width: '100%'
     }
 };
 

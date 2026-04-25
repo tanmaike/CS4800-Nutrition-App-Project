@@ -820,4 +820,22 @@ const styles = {
     }
 };
 
+// Add these responsive overrides
+const responsiveStyles = {
+    '@media (max-width: 768px)': {
+        locationGrid: {
+            gridTemplateColumns: '1fr'
+        },
+        distanceGrid: {
+            gridTemplateColumns: '1fr'
+        },
+        filterContainer: {
+            flexDirection: 'column'
+        },
+        formRow: {
+            flexDirection: 'column'
+        }
+    }
+};
+
 export default DistanceCalculator;

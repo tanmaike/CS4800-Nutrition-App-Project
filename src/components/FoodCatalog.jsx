@@ -866,4 +866,33 @@ const styles = {
     }
 };
 
+// Add at the end of the styles object
+// Mobile responsive overrides
+const mobileStyles = `
+@media (max-width: 768px) {
+    .food-catalog-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .food-catalog-controls {
+        flex-direction: column !important;
+    }
+    
+    .food-catalog-search {
+        width: 100% !important;
+    }
+    
+    .food-catalog-sort {
+        width: 100% !important;
+    }
+}
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = mobileStyles;
+    document.head.appendChild(styleSheet);
+}
+
 export default FoodCatalog;

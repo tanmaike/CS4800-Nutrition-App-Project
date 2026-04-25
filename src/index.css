@@ -4,8 +4,15 @@
   box-sizing: border-box;
 }
 
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
+  padding: 0;
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -13,6 +20,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: white;
   color: #0c0c0c;
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Touch-friendly inputs */
+input, select, textarea, button {
+  touch-action: manipulation;
+}
+
+/* Improve scrolling on iOS */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better mobile scrolling */
+.scrollable {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 code {
@@ -42,4 +71,88 @@ code {
 /* Animation for hover effects */
 button, .nav-button {
   transition: all 0.3s ease;
+}
+
+/* Responsive Utility Classes */
+.hide-on-mobile {
+  display: block;
+}
+
+.show-on-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hide-on-mobile {
+      display: none;
+  }
+  
+  .show-on-mobile {
+      display: block;
+  }
+  
+  /* Stack layouts on mobile */
+  .stack-on-mobile {
+      flex-direction: column !important;
+      gap: 15px !important;
+  }
+  
+  /* Full width on mobile */
+  .full-width-mobile {
+      width: 100% !important;
+  }
+  
+  /* Center text on mobile */
+  .center-mobile {
+      text-align: center !important;
+  }
+}
+
+/* Improved mobile scrolling */
+.mobile-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Card hover effects only on desktop */
+@media (min-width: 769px) {
+  .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+  }
+}
+
+/* Responsive Navigation Transitions */
+@media (max-width: 768px) {
+  /* Smooth mobile menu animation */
+  .mobile-menu-enter {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+  }
+  
+  .mobile-menu-enter-active {
+      max-height: 500px;
+      opacity: 1;
+  }
+  
+  .mobile-menu-exit {
+      max-height: 500px;
+      opacity: 1;
+  }
+  
+  .mobile-menu-exit-active {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-in, opacity 0.2s ease-in;
+  }
+  
+  /* Touch feedback for mobile buttons */
+  button:active {
+      transform: scale(0.98);
+      transition: transform 0.05s;
+  }
 }
