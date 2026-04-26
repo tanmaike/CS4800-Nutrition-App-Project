@@ -19,6 +19,23 @@ router.post('/locations', requireAuth, async (req, res) => {
         if (!coordinates || typeof coordinates.lat !== 'number' || typeof coordinates.lng !== 'number') {
             return res.status(400).json({ message: 'Valid coordinates (lat/lng) are required' });
         }
+
+        // Middleware to check authentication (only for adding/editing)
+        const requireAuth = (req, res, next) => {
+            console.log('=== AUTH CHECK ===');
+            console.log('Session ID:', req.sessionID);
+            console.log('Session User:', req.session.user);
+            console.log('Cookies received:', req.headers.cookie);
+            console.log('=================');
+            
+            if (!req.session.user) {
+                console.log('❌ Authentication failed - no user in session');
+                return res.status(401).json({ message: 'Authentication required' });
+            }
+            
+            console.log('✅ Authentication successful for user:', req.session.user.username);
+            next();
+        };
         
         const location = new Location({
             name,

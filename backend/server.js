@@ -71,6 +71,22 @@ app.get('/api/test', (req, res) => {
     });
 });
 
+// Debug session endpoint
+app.get('/api/debug-session', (req, res) => {
+    console.log('=== DEBUG SESSION ===');
+    console.log('Session ID:', req.sessionID);
+    console.log('Session User:', req.session.user);
+    console.log('Cookies:', req.headers.cookie);
+    
+    res.json({
+        sessionID: req.sessionID,
+        hasSession: !!req.session,
+        isAuthenticated: !!req.session?.user,
+        user: req.session.user || null,
+        cookiesPresent: !!req.headers.cookie
+    });
+});
+
 // Routes
 app.use('/api', itemRoutes);
 app.use('/api/users', userRoutes);

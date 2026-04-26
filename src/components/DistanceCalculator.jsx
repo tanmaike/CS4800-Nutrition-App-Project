@@ -28,7 +28,22 @@ class DistanceCalculator extends Component {
 
     componentDidMount() {
         this.fetchLocations();
+        this.checkSession();
     }
+
+    checkSession = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/debug-session`, {
+                withCredentials: true
+            });
+            console.log('Session status:', response.data);
+            if (!response.data.isAuthenticated && this.props.user) {
+                console.log('Session mismatch - please refresh');
+            }
+        } catch (error) {
+            console.error('Session check error:', error);
+        }
+    };
 
     fetchLocations = async () => {
         try {
