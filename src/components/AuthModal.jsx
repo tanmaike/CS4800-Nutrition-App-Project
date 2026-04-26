@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import API_URL from '../config';
-import axios from 'axios';
+import axios from '../axiosConfig';
 
 class AuthModal extends Component {
     state = {

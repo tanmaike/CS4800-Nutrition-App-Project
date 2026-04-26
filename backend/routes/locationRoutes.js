@@ -57,14 +57,14 @@ router.post('/locations', requireAuth, async (req, res) => {
 });
 
 // GET all locations - public (no authentication required)
-router.get('/locations', requireAuth, async (req, res) => {
+router.get('/locations', async (req, res) => {
     try {
         // Show all public locations, plus user's private locations if logged in
         const query = req.session.user 
             ? { $or: [{ isPublic: true }, { createdBy: req.session.user.userId }] }
             : { isPublic: true };
         
-        const locations = await Location.find(query).sort({ macrolocation: 1, name: 1 });
+        const locations = await Location.find(query).sort({ name: 1 });
         res.json(locations);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching locations', error: error.message });

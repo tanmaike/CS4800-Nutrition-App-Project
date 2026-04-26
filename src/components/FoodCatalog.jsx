@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig';
 import API_URL from '../config';
 
 class FoodCatalog extends Component {

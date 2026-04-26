@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import axios from './axiosConfig';
 import Navigation from './components/Navigation';
 import FoodCatalog from './components/FoodCatalog';
 import DistanceCalculator from './components/DistanceCalculator';
