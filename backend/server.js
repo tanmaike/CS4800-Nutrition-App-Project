@@ -42,14 +42,20 @@ app.use(express.json());
 
 // Session configuration
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: true,
+    saveUninitialized: true,
     cookie: {
-        secure: true,
+        secure: false,
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 // 24 hours
-    }
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax',
+        path: '/',
+        domain: '.sanjosehillsfitness.com'  // Note the dot at the beginning
+    },
+    name: 'nutrition.sid',
+    proxy: true,
+    rolling: true  // Reset cookie expiration on each request
 }));
 
 // Health check endpoint

@@ -46,7 +46,7 @@ class DistanceCalculator extends Component {
 
     fetchLocations = async () => {
         try {
-            const response = await axios.get(`${API_URL}/locations`, {
+            const response = await axios.get('/locations', {
                 withCredentials: true
             });
             this.setState({ locations: response.data });

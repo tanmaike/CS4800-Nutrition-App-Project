@@ -172,10 +172,6 @@ router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        if (!username || !password) {
-            return res.status(400).json({ message: 'Username and password are required' });
-        }
-
         // Find user
         const user = await User.findOne({ username });
         if (!user) {
@@ -192,21 +188,38 @@ router.post('/login', async (req, res) => {
         user.lastLogin = new Date();
         await user.save();
 
-        // Create session
+        // Set session
         req.session.user = {
             id: user._id,
             userId: user.userId,
             username: user.username,
             displayName: user.displayName
         };
-
-        res.json({
-            message: 'Login successful',
-            user: {
-                userId: user.userId,
-                username: user.username,
-                displayName: user.displayName
+        
+        // Save session explicitly and set cookie
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ message: 'Session error' });
             }
+            
+            // Set cookie explicitly in response
+            res.cookie('nutrition.sid', req.sessionID, {
+                path: '/',
+                httpOnly: true,
+                maxAge: 24 * 60 * 60 * 1000, // 24 hours
+                sameSite: 'lax',
+                domain: '.sanjosehillsfitness.com'  // Important for cross-subdomain
+            });
+            
+            res.json({
+                message: 'Login successful',
+                user: {
+                    userId: user.userId,
+                    username: user.username,
+                    displayName: user.displayName
+                }
+            });
         });
     } catch (error) {
         console.error('Login error:', error);

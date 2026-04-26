@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../axiosConfig';
 import API_URL from "../config";
 
 // Configure axios defaults
