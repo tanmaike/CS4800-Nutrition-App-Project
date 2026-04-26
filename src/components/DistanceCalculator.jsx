@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import API_URL from "../config";
-import axios from 'axios';
-
+import axios from '../axiosConfig';
 
 class DistanceCalculator extends Component {
     constructor(props) {
@@ -96,9 +95,8 @@ class DistanceCalculator extends Component {
 
     addLocation = async (e) => {
         e.preventDefault();
-        const { newLocation, addingLocation } = this.state;
+        const { newLocation } = this.state;
         
-        // Check if user is logged in
         if (!this.props.user) {
             this.setState({ error: 'Please login to add locations' });
             return;
@@ -124,15 +122,13 @@ class DistanceCalculator extends Component {
         }
         
         this.setState({ addingLocation: true, error: null });
-        
+                
         try {
-            await axios.post(`${API_URL}/locations`, {
+            const response = await axios.post('/api/locations', {  // Use relative path
                 name: newLocation.name,
                 coordinates: { lat, lng },
                 macrolocation: newLocation.macrolocation,
                 isPublic: newLocation.isPublic
-            }, {
-                withCredentials: true
             });
             
             // Refresh locations
@@ -150,6 +146,7 @@ class DistanceCalculator extends Component {
                 }
             });
         } catch (error) {
+            console.error('Add location error:', error.response?.data || error);
             this.setState({ 
                 error: error.response?.data?.message || 'Error adding location',
                 addingLocation: false 

@@ -76,14 +76,15 @@ app.get('/api/debug-session', (req, res) => {
     console.log('=== DEBUG SESSION ===');
     console.log('Session ID:', req.sessionID);
     console.log('Session User:', req.session.user);
-    console.log('Cookies:', req.headers.cookie);
+    console.log('Cookies header:', req.headers.cookie);
     
     res.json({
         sessionID: req.sessionID,
         hasSession: !!req.session,
         isAuthenticated: !!req.session?.user,
         user: req.session.user || null,
-        cookiesPresent: !!req.headers.cookie
+        cookiesReceived: !!req.headers.cookie,
+        cookieHeader: req.headers.cookie || 'none'
     });
 });
 

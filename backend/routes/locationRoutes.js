@@ -22,18 +22,17 @@ router.post('/locations', requireAuth, async (req, res) => {
 
         // Middleware to check authentication (only for adding/editing)
         const requireAuth = (req, res, next) => {
-            console.log('=== AUTH CHECK ===');
+            console.log('📍 Location Auth Check');
             console.log('Session ID:', req.sessionID);
-            console.log('Session User:', req.session.user);
-            console.log('Cookies received:', req.headers.cookie);
-            console.log('=================');
+            console.log('Session User:', req.session?.user);
+            console.log('Cookies:', req.headers.cookie);
             
-            if (!req.session.user) {
-                console.log('❌ Authentication failed - no user in session');
+            if (!req.session || !req.session.user) {
+                console.log('❌ Location creation: No authenticated user found');
                 return res.status(401).json({ message: 'Authentication required' });
             }
             
-            console.log('✅ Authentication successful for user:', req.session.user.username);
+            console.log('✅ Location creation: User authenticated:', req.session.user.username);
             next();
         };
         
@@ -58,7 +57,7 @@ router.post('/locations', requireAuth, async (req, res) => {
 });
 
 // GET all locations - public (no authentication required)
-router.get('/locations', async (req, res) => {
+router.get('/locations', requireAuth, async (req, res) => {
     try {
         // Show all public locations, plus user's private locations if logged in
         const query = req.session.user 
