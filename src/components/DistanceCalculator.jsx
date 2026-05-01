@@ -32,7 +32,7 @@ class DistanceCalculator extends Component {
 
     checkSession = async () => {
         try {
-            const response = await axios.get(`${API_URL}/debug-session`, {
+            const response = await axios.get(`/debug-session`, {
                 withCredentials: true
             });
             console.log('Session status:', response.data);
@@ -67,7 +67,7 @@ class DistanceCalculator extends Component {
         this.setState({ loading: true, error: null, result: null });
         
         try {
-            const response = await axios.post(`${API_URL}/calculate-distance`, {
+            const response = await axios.post(`/calculate-distance`, {
                 originId,
                 destinationId
             }, {
@@ -124,7 +124,7 @@ class DistanceCalculator extends Component {
         this.setState({ addingLocation: true, error: null });
                 
         try {
-            const response = await axios.post('/api/locations', {  // Use relative path
+            const response = await axios.post('/locations', {  // Use relative path
                 name: newLocation.name,
                 coordinates: { lat, lng },
                 macrolocation: newLocation.macrolocation,

@@ -37,9 +37,9 @@ class FoodCatalog extends Component {
     fetchItems = async () => {
         this.setState({ loading: true, error: null });
         try {
-            const response = await axios.get(`${API_URL}/items`, {
+            const response = await axios.get('/items', {
                 withCredentials: true
-            });
+            });            
             const items = Array.isArray(response.data) ? response.data : [];
             this.setState({ items, loading: false });
             this.applyFilters();
@@ -167,7 +167,7 @@ class FoodCatalog extends Component {
         this.setState({ addingItem: true, error: null });
         
         try {
-            const response = await axios.post(`${API_URL}/items`, {
+            const response = await axios.post('/items', {
                 name: newItem.name,
                 calories: parseFloat(newItem.calories),
                 quantity: parseFloat(newItem.quantity),
