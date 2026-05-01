@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 
+const LOGIN_ENABLED = false;
+
 // Helper function to get next userId
 const getNextUserId = async () => {
     const lastUser = await User.findOne().sort({ userId: -1 });
@@ -45,6 +47,11 @@ router.post('/register', [
         .matches(/^[a-zA-Z0-9\s\-_]+$/)
         .withMessage('Display name can only contain letters, numbers, spaces, hyphens, and underscores')
 ], async (req, res) => {
+    if (!LOGIN_ENABLED) {
+        return res.status(503).json({ 
+            message: 'Registration temporarily disabled. Please check back later.' 
+        });
+    }
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -169,6 +176,11 @@ router.post('/register', [
 
 // Login user
 router.post('/login', async (req, res) => {
+    if (!LOGIN_ENABLED) {
+        return res.status(503).json({ 
+            message: 'Login temporarily disabled. Please check back later.' 
+        });
+    }
     try {
         const { username, password } = req.body;
 
