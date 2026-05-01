@@ -19,6 +19,16 @@ class AuthModal extends Component {
 
     handleSubmit = async (e) => {
         e.preventDefault();
+
+        const loginDisabled = true; // Set this to match your state
+        if (loginDisabled) {
+            this.setState({ 
+                error: 'Registration and login are temporarily disabled due to spam. Please check back later.',
+                loading: false 
+            });
+            return;
+        }
+
         this.setState({ loading: true, error: null, fieldErrors: {} });
         
         const { isLogin, username, password, displayName } = this.state;

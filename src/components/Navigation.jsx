@@ -7,6 +7,9 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+    const [loginDisabled, setLoginDisabled] = useState(true); // Set to true to disable login
+    const [tooltipText, setTooltipText] = useState('Registration temporarily disabled due to spam. Please check back later.');
+
     // Handle window resize
     useEffect(() => {
         const handleResize = () => {
@@ -84,10 +87,17 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                             ) : (
                                 <button 
                                     onClick={() => {
-                                        setShowAuthModal(true);
-                                        setIsMobileMenuOpen(false);
+                                        if (!loginDisabled) {
+                                            setShowAuthModal(true);
+                                            setIsMobileMenuOpen(false);
+                                        }
                                     }} 
-                                    style={styles.mobileLoginBtn}
+                                    style={{
+                                        ...styles.mobileLoginBtn,
+                                        ...(loginDisabled && styles.mobileLoginBtnDisabled)
+                                    }}
+                                    disabled={loginDisabled}
+                                    title={loginDisabled ? "Login temporarily disabled" : ""}
                                 >
                                     Login / Register
                                 </button>
@@ -172,26 +182,38 @@ const Navigation = ({ currentPage, onPageChange, user, onLoginSuccess, onLogout 
                 
                 {/* Right Section - User Authentication */}
                 <div style={styles.rightSection}>
-                    {user ? (
-                        <div style={styles.userInfo}>
-                            <span style={styles.userName}>
-                                👤 {user.displayName}
-                            </span>
-                            <button 
-                                onClick={handleLogout}
-                                style={styles.logoutBtn}
-                            >
-                                Logout
-                            </button>
-                        </div>
-                    ) : (
+                    
+                {user ? (
+                    <div style={styles.userInfo}>
+                        <span style={styles.userName}>
+                            👤 {user.displayName}
+                        </span>
+                        <button onClick={handleLogout} style={styles.logoutBtn}>
+                            Logout
+                        </button>
+                    </div>
+                ) : (
+                    <div style={styles.loginContainer}>
                         <button 
-                            onClick={() => setShowAuthModal(true)}
-                            style={styles.loginBtn}
+                            onClick={() => !loginDisabled && setShowAuthModal(true)}
+                            style={{
+                                ...styles.loginBtn,
+                                ...(loginDisabled && styles.loginBtnDisabled)
+                            }}
+                            onMouseEnter={() => loginDisabled && setTooltipText('Registration temporarily disabled due to spam. Please check back later.')}
+                            onMouseLeave={() => loginDisabled && setTooltipText('')}
+                            disabled={loginDisabled}
+                            title={loginDisabled ? "Login temporarily disabled" : ""}
                         >
                             Login / Register
                         </button>
-                    )}
+                        {loginDisabled && tooltipText && (
+                            <div style={styles.tooltip}>
+                                {tooltipText}
+                            </div>
+                        )}
+                    </div>
+                )}
                 </div>
             </nav>
             
@@ -436,6 +458,66 @@ const styles = {
     mobileNavSpacer: {
         height: '120px', // Extra space for stacked mobile nav
         width: '100%'
+    }, 
+    loginContainer: {
+        position: 'relative',
+        display: 'inline-block'
+    },
+    
+    loginBtn: {
+        padding: '8px 16px',
+        backgroundColor: '#ffc036',
+        color: '#0c0c0c',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        transition: 'all 0.3s ease',
+        whiteSpace: 'nowrap'
+    },
+    
+    loginBtnDisabled: {
+        backgroundColor: '#cccccc',
+        color: '#666666',
+        cursor: 'not-allowed',
+        opacity: 0.7
+    },
+    
+    tooltip: {
+        position: 'absolute',
+        bottom: '100%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        marginBottom: '10px',
+        padding: '8px 12px',
+        backgroundColor: '#333',
+        color: 'white',
+        fontSize: '12px',
+        borderRadius: '4px',
+        whiteSpace: 'nowrap',
+        zIndex: 1000,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+    },
+    
+    mobileLoginBtn: {
+        padding: '12px',
+        backgroundColor: '#ffc036',
+        color: '#0c0c0c',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '16px',
+        fontWeight: '500',
+        width: '100%',
+        textAlign: 'center'
+    },
+    
+    mobileLoginBtnDisabled: {
+        backgroundColor: '#cccccc',
+        color: '#666666',
+        cursor: 'not-allowed',
+        opacity: 0.7
     }
 };
 
